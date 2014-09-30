@@ -3,13 +3,8 @@
             [korma.core :as k]
             [hiccup.core :refer :all]
             [hiccup.form :refer :all]
+            [hiccup.element :refer :all]
             [ring.util.anti-forgery :refer :all]))
-
-(defn index [session]
-  (str session)
-  #_(if (db/valid-user? (:username session) (:pw session))
-    (logged-in session)
-    (not-logged-in session)))
 
 (defn site-template
   "Takes hiccup html and wraps it in site-global template" 
@@ -19,12 +14,18 @@
     [:body
      [:h1 "amzn scrpr"] h]]))
 
-(defn logged-in [session]
-  (->> [:h3 "Links you're following."]
-       ;; TODO get-links
-       site-template))
+(defn logged-in [request]
+  (let [{params :params} request
+        {username :username} params
+        {session :session} request]
+      ;; TODO get-links
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (site-template (html [:h3 "Links you're following, ." (:username session)] [:br]
+                                  (str session)))
+       :session (assoc session :username username)}))
 
-(defn not-logged-in [] 
+(defn not-logged-in [session] 
   (site-template
    (html 
     (form-to [:post "/login"]
@@ -32,12 +33,29 @@
               "password:" (password-field "password") [:br]
               (submit-button "log in"))
      (html [:br] [:br])
-     (form-to [:post "/submit"]
+     (form-to [:post "/register"]
               "username:" [:input {:type "text" :name "username"}] [:br]
               "password:" (password-field "password") [:br]
               "email:" [:input {:type "text" :name "email"}] [:br]
               (anti-forgery-field)
-              (submit-button "submit")))))
+              (submit-button "submit"))
+     (html [:br] [:br] (str session)))))
+
+(defn index [session]
+ (html (str session) (link-to session "/login" "log-in" ))
+#_(if (db/user-exists? (session :username))
+    (logged-in session)
+    (not-logged-in session)))
+
+(defn login 
+  [request]
+  (let [{params :params} request
+        {username :username} params  
+        {password :password} params
+        {session :session} request]
+    (if (db/valid-user? username password)
+      (logged-in request)
+      (not-logged-in))))
 
 (defn registration-failed []
   (->> [:h2 "Sorry, registration failed!"]
@@ -60,3 +78,10 @@
     (do
       (db/add-user! username pw email)
       (registration-successful)))))
+
+(defn session-test [request]
+  (let [{session :session} request] 
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (str request)
+     :session (assoc session :counter 1)}))

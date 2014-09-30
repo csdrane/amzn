@@ -1,19 +1,27 @@
 ; Run test server with `lein ring server-headless`
 (ns hackerati-interval-web-app.core
   (:require  [cider.nrepl :refer (cider-nrepl-handler)]
-             [hackerati-interval-web-app.views :as views]
-             [ring.middleware.defaults :refer :all]
              [compojure.core :refer :all]
              [compojure.handler :as handler]
              [compojure.route :as route]))
+             [hackerati-interval-web-app.views :as views]
+             [ring.middleware.defaults :refer :all]
+             [ring.middleware.session.cookie]
 
 (defroutes main-routes
-  (GET "/" session (views/index session)) 
-  (POST "/submit" session (views/attempt-register session))
-  (GET "/temp" []  (views/not-logged-in))
+  (GET "/" {session :session} (views/index session)) 
+  (GET "/login" {session :session}  (views/not-logged-in session))
+  (POST "/login" request (views/login request))
+  (POST "/register" request (views/attempt-register request))
+  (GET "/test" request (views/session-test request))
   (route/not-found "<h1>Page not found</h1>"))
 
-;; Add back anti-forgery when site goes live.
+;; TODO Add back anti-forgery when site goes live.
+;; TODO replace cookie key
 (def app
-  (->> (assoc-in site-defaults [:security :anti-forgery] false)  
-       (wrap-defaults (handler/site main-routes))))
+  (wrap-defaults 
+   (handler/site main-routes)
+   (-> (assoc-in site-defaults [:security :anti-forgery] false)  
+       (assoc-in [:store] (ring.middleware.session.cookie/cookie-store {:key "a 16-byte secret"})))))
+
+ 
