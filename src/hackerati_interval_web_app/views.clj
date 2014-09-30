@@ -26,7 +26,8 @@
       ;; TODO get-links
       {:status 200
        :headers {"Content-Type" "text/html"}
-       :body (site-template (html [:h3 "Links you're following, ." (:username session)] [:br]
+       :body (site-template (html [:h3 "Links you're following, " (:username session)] [:br] [:br]
+                                  #_(db/get-links )
                                   (debug session)))
        :session (assoc session :username username)}))
 

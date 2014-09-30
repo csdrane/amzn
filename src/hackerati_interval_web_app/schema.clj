@@ -31,25 +31,40 @@
   (belongs-to products)
   (entity-fields :date :price))
 
-(declare add-user delete-user add-product delete-product set-email add-date-price)
-
 (defn add-user! [username pw email]
   (insert users
           (values  {:username username
                     :password (password/encrypt pw)
                     :email email})))
 
-(defn fetch-user-pw [username]
+;; TODO delete?
+;; Might not be necessary
+;; (defn get-user-id [username]
+;;   (->> (select users
+;;                (where {:username username}))
+;;        first
+;;        :userid))
+
+;; TODO work in progress
+(defn get-links [username]
+  (select tracked-links
+          (with users)
+          (join products.)
+          (where {:username username})
+          (fields :url)))
+
+(defn get-user-pw [username]
   (->> (select users
-           (where {:username username}))
+               (where {:username username}))
        first
        :password))
 
+(defn user-exists? [username]
+  (seq (select users (where {:username username}))))
+
 (defn valid-user? [username password]
-  (password/check password (fetch-user-pw username)))
+  (password/check password (get-user-pw username)))
 
 ;; TODO
 ;; (defn delete-user [username])
 
-(defn user-exists? [username]
-  (seq (select users (where {:username username}))))
