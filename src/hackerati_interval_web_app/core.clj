@@ -3,10 +3,10 @@
   (:require  [cider.nrepl :refer (cider-nrepl-handler)]
              [compojure.core :refer :all]
              [compojure.handler :as handler]
-             [compojure.route :as route]))
+             [compojure.route :as route]
              [hackerati-interval-web-app.views :as views]
              [ring.middleware.defaults :refer :all]
-             [ring.middleware.session.cookie]
+             [ring.middleware.session.cookie]))
 
 (defroutes main-routes
   (GET "/" {session :session} (views/index session)) 

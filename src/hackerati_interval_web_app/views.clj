@@ -6,6 +6,11 @@
             [hiccup.element :refer :all]
             [ring.util.anti-forgery :refer :all]))
 
+(def ^:dynamic *debug-mode* true)
+
+(defn debug [x]
+  (if *debug-mode* (str x)))
+
 (defn site-template
   "Takes hiccup html and wraps it in site-global template" 
   [h]
@@ -22,7 +27,7 @@
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (site-template (html [:h3 "Links you're following, ." (:username session)] [:br]
-                                  (str session)))
+                                  (debug session)))
        :session (assoc session :username username)}))
 
 (defn not-logged-in [session] 
@@ -39,10 +44,10 @@
               "email:" [:input {:type "text" :name "email"}] [:br]
               (anti-forgery-field)
               (submit-button "submit"))
-     (html [:br] [:br] (str session)))))
+     (html [:br] [:br] (debug session)))))
 
 (defn index [session]
- (html (str session) (link-to session "/login" "log-in" ))
+  (html (debug session) (link-to session "/login" "log-in" ))
 #_(if (db/user-exists? (session :username))
     (logged-in session)
     (not-logged-in session)))
