@@ -3,6 +3,8 @@
             [korma.core :refer :all]
             [crypto.password.bcrypt :as password]))
 
+;;;;;;;;;;;;;;;;;;;; DEFINITIONS ;;;;;;;;;;;;;;;;;;;;
+
 (defdb db (mysql {:host "127.0.0.1"
                   :db "hackerati"
                   :user "project"
@@ -31,6 +33,12 @@
   (pk :priceid)
   (belongs-to products {:fk :productid})
   (entity-fields :priceid :productid :date :price))
+(defdb db (mysql {:host "127.0.0.1"
+                  :db "hackerati"
+                  :user "project"
+                  :password "project"}))
+
+;;;;;;;;;;;;;;;;;;;; FUNCTIONS ;;;;;;;;;;;;;;;;;;;;
 
 (defn add-link! [userid url]
   (let [productid ((insert products (values {:url url})) :generated_key)]
@@ -42,13 +50,14 @@
                     :password (password/encrypt pw)
                     :email email})))
 
-;; TODO delete?
-;; Might not be necessary
-;; (defn get-user-id [username]
-;;   (->> (select users
-;;                (where {:username username}))
-;;        first
-;;        :userid))
+;; TODO
+;; (defn delete-user [username])
+
+(defn get-user-id [username]
+  (->> (select users
+               (where {:username username}))
+       first
+       :userid))
 
 (defn get-links [username]
   (->> (select users 
@@ -70,6 +79,4 @@
 (defn valid-user? [username password]
   (password/check password (get-user-pw username)))
 
-;; TODO
-;; (defn delete-user [username])
 

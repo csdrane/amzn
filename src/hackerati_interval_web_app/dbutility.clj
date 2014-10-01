@@ -7,7 +7,7 @@
               :user "project"
               :password "project"})
 
-(defn drop-database
+(defn drop-database!
   [name]
   (if-let [^java.sql.Connection con (get-connection db-spec)]
     (with-open [stmt (.createStatement con)]
@@ -15,10 +15,15 @@
       (seq (.executeBatch stmt)))
     false))
 
-(defn create-database  
+(defn create-database!  
   [name]
   (if-let [^java.sql.Connection con (get-connection db-spec)]
     (with-open [stmt (.createStatement con)]
       (.addBatch stmt (str "create database " name))
       (seq (.executeBatch stmt)))
     false))
+
+(defn database-exist? 
+  [name]
+  (query db-spec (str "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = " "'" name "'")))
+
