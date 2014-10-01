@@ -12,24 +12,29 @@
 
 (defentity users
   (pk :userid)
-  (entity-fields :username :password :email)
-  (has-many tracked-links))
+  (entity-fields :userid :username :password :email)
+  (has-many tracked-links {:fk :userid}))
 
 (defentity tracked-links
   (table :trackedlinks)
   (pk :actionid)
-  (belongs-to users)
-  (has-one products))
+  (entity-fields :userid :actionid :productid)
+  (belongs-to users {:fk :userid})
+  (has-one products {:fk :productid}))
 
 (defentity products 
   (pk :productid)
-  (entity-fields :url)
-  (has-many tracked-links))
+  (entity-fields :productid :url)
+  (has-many tracked-links {:fk :productid}))
 
 (defentity prices
   (pk :priceid)
-  (belongs-to products)
-  (entity-fields :date :price))
+  (belongs-to products {:fk :productid})
+  (entity-fields :priceid :productid :date :price))
+
+(defn add-link! [userid url]
+  (let [productid ((insert products (values {:url url})) :generated_key)]
+    (insert tracked-links (values {:userid userid :productid productid}))))
 
 (defn add-user! [username pw email]
   (insert users
@@ -45,13 +50,13 @@
 ;;        first
 ;;        :userid))
 
-;; TODO work in progress
 (defn get-links [username]
-  (select tracked-links
-          (with users)
-          (join products.)
-          (where {:username username})
-          (fields :url)))
+  (->> (select users 
+               (fields [:products.url]) 
+               (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
+               (join [products :products] { :products.productid :trackedlinks.productid}) 
+               (where {:username username}))
+       (map :url)))
 
 (defn get-user-pw [username]
   (->> (select users
