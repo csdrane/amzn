@@ -58,3 +58,11 @@
 (deftest get-links-test
   (is (= (db/get-links "chris")
          ["http://foo.com" "http://baz.com" "http://bar.com"])))
+
+(deftest valid-user?-test 
+  (is (every? true? (map (partial apply db/valid-user?) 
+      [["chris" "chris-pw"] 
+       ["nick" "nick-pw"] 
+       ["andy" "andy-pw"]]))))
+
+

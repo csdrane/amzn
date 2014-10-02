@@ -12,4 +12,4 @@ pom.xml.asc
 *.txt
 *.DS_Store
 *.emacs*
-#*#
+\#*#

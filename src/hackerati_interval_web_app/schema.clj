@@ -75,5 +75,3 @@
 
 (defn valid-user? [username password]
   (password/check password (get-user-pw username)))
-
-
