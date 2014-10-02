@@ -44,4 +44,17 @@
 (db/add-user! "nick" "nick-pw" "baz@bar.com")
 (db/add-user! "andy" "andy-pw" "blick@blat.net")
 
-(kcore/select users)
+(doseq [url ["http://foo.com" "http://baz.com" "http://bar.com"]
+        userid (map db/get-user-id ["chris" "nick" "andy"])]
+  (db/add-link! userid url))
+
+;;;;;;;;;;;;;;;;;;;; TESTS  ;;;;;;;;;;;;;;;;;;;;
+
+(deftest select-user-names-test
+  (is (= (map #(get % :username) 
+              (kcore/select db/users))
+         ["chris" "nick" "andy"])))
+
+(deftest get-links-test
+  (is (= (db/get-links "chris")
+         ["http://foo.com" "http://baz.com" "http://bar.com"])))
