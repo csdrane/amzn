@@ -33,10 +33,7 @@
   (pk :priceid)
   (belongs-to products {:fk :productid})
   (entity-fields :priceid :productid :date :price))
-(defdb db (mysql {:host "127.0.0.1"
-                  :db "hackerati"
-                  :user "project"
-                  :password "project"}))
+
 
 ;;;;;;;;;;;;;;;;;;;; FUNCTIONS ;;;;;;;;;;;;;;;;;;;;
 
