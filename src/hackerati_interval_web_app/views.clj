@@ -2,14 +2,22 @@
   (:require [hackerati-interval-web-app.schema :as db]
             [korma.core :as k]
             [hiccup.core :refer :all]
-            [hiccup.form :refer :all]
+            [hiccup.def :refer :all]
             [hiccup.element :refer :all]
+            [hiccup.form :refer :all]
+            [hiccup.page :refer :all]
             [ring.util.anti-forgery :refer :all]))
 
-(def ^:dynamic *debug-mode* true)
+(def ^:dynamic *debug-mode* false)
 
 (defn debug [x]
   (if *debug-mode* (str x)))
+
+(defn- include-bootstrap []
+  (list
+   (include-css "/bootstrap/css/bootstrap.min.css")
+   (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
+   (include-js "/bootstrap/js/bootstrap.min.js")))
 
 (defn- get-username-from-request-map [request]
   {:pre [(or (contains? (request :session) :username)
@@ -20,23 +28,38 @@
     (if-let [username (-> request :params :username)]
       username)))
 
-(defn site-template
+(defhtml site-template
   "Takes hiccup html and wraps it in site-global template" 
-  [h]
-  (html 
-   [:html 
-    [:body
+  [h] 
+  (html5 
+   [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+   (include-bootstrap)
+   [:body
+    [:div {:class "container"} 
      [:h1 "amzn scrpr"] h]]))
+
+(defn- tracked-links-html [username]
+  (html
+   [:div  
+    [:table {:class "table table-striped"}
+     [:tbody 
+      (for [url (db/get-links username)]
+        [:tr
+         [:td
+          [:a {:href url} url]]])]]]))
+
+(defn logged-in? [session]
+  (contains? session :username))
 
 (defn logged-in [request]
   (let [username (get-username-from-request-map request)
         {session :session} request]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (site-template (html [:h3 "Links you're following, " (str username)] [:br] [:br]
-                                (for [url (db/get-links username)]
-                                  [:a {:href url} url])
-                                (debug request)))
+     :body (site-template (html 
+                           [:h3 "Links you're following, " (str username)] [:br] [:br]
+                           (tracked-links-html username)
+                           (debug request)))
      :session (assoc session :username username)}))
  
 (defn not-logged-in [session] 
@@ -56,10 +79,10 @@
     (html [:br] [:br] (debug session)))))
 
 (defn index [session]
-  (html (debug session) (link-to session "/login" "log-in" ))
-#_(if (db/user-exists? (session :username))
-    (logged-in session)
-    (not-logged-in session)))
+  (if (logged-in? session)
+      (if (db/user-exists? (session :username))
+        (logged-in session))
+      (not-logged-in session)))
 
 (defn login 
   [request]

@@ -14,6 +14,7 @@
   (POST "/login" request (views/login request))
   (POST "/register" request (views/attempt-register request))
   (GET "/test" request (views/session-test request))
+  (route/resources "/bootstrap")
   (route/not-found "<h1>Page not found</h1>"))
 
 ;; TODO Add back anti-forgery when site goes live.
