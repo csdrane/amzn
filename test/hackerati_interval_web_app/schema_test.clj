@@ -59,6 +59,10 @@
   (is (= (db/get-links "chris")
          ["http://foo.com" "http://baz.com" "http://bar.com"])))
 
+(deftest user-exists?-test
+  (is (some? (db/user-exists? "chris")))
+  (is (empty? (db/user-exists? "chrsi"))))
+
 (deftest valid-user?-test 
   (is (every? true? (map (partial apply db/valid-user?) 
       [["chris" "chris-pw"] 

@@ -11,6 +11,15 @@
 (defn debug [x]
   (if *debug-mode* (str x)))
 
+(defn- get-username-from-request-map [request]
+  {:pre [(or (contains? (request :session) :username)
+             (contains? (request :params) :username))]
+   :post [((comp not empty?) %)]}
+  (if-let [username (-> request :session :username)]
+    username
+    (if-let [username (-> request :params :username)]
+      username)))
+
 (defn site-template
   "Takes hiccup html and wraps it in site-global template" 
   [h]
@@ -18,6 +27,7 @@
    [:html 
     [:body
      [:h1 "amzn scrpr"] h]]))
+
 
 (defn logged-in [request]
   (let [{params :params} request
@@ -27,7 +37,7 @@
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (site-template (html [:h3 "Links you're following, " (:username session)] [:br] [:br]
-                                  #_(db/get-links )
+                                  (db/get-links username )
                                   (debug session)))
        :session (assoc session :username username)}))
 

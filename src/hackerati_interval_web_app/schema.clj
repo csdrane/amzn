@@ -37,6 +37,9 @@
 
 ;;;;;;;;;;;;;;;;;;;; FUNCTIONS ;;;;;;;;;;;;;;;;;;;;
 
+
+;; TODO duplicate URLs should just not create multiple productids,
+;; only multiple actionids
 (defn add-link! [userid url]
   (let [productid ((insert products (values {:url url})) :generated_key)]
     (insert tracked-links (values {:userid userid :productid productid}))))
@@ -60,7 +63,7 @@
   (->> (select users 
                (fields [:products.url]) 
                (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
-               (join [products :products] { :products.productid :trackedlinks.productid}) 
+               (join [products :products] {:products.productid :trackedlinks.productid}) 
                (where {:username username}))
        (map :url)))
 
