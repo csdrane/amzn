@@ -28,34 +28,32 @@
     [:body
      [:h1 "amzn scrpr"] h]]))
 
-
 (defn logged-in [request]
-  (let [{params :params} request
-        {username :username} params
+  (let [username (get-username-from-request-map request)
         {session :session} request]
-      ;; TODO get-links
-      {:status 200
-       :headers {"Content-Type" "text/html"}
-       :body (site-template (html [:h3 "Links you're following, " (:username session)] [:br] [:br]
-                                  (db/get-links username )
-                                  (debug session)))
-       :session (assoc session :username username)}))
-
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (site-template (html [:h3 "Links you're following, " (str username)] [:br] [:br]
+                                (for [url (db/get-links username)]
+                                  [:a {:href url} url])
+                                (debug request)))
+     :session (assoc session :username username)}))
+ 
 (defn not-logged-in [session] 
   (site-template
    (html 
     (form-to [:post "/login"]
-              "username:" [:input {:type "text" :name "username"}] [:br]
-              "password:" (password-field "password") [:br]
-              (submit-button "log in"))
-     (html [:br] [:br])
-     (form-to [:post "/register"]
-              "username:" [:input {:type "text" :name "username"}] [:br]
-              "password:" (password-field "password") [:br]
-              "email:" [:input {:type "text" :name "email"}] [:br]
-              (anti-forgery-field)
-              (submit-button "submit"))
-     (html [:br] [:br] (debug session)))))
+             "username:" [:input {:type "text" :name "username"}] [:br]
+             "password:" (password-field "password") [:br]
+             (submit-button "log in"))
+    (html [:br] [:br])
+    (form-to [:post "/register"]
+             "username:" [:input {:type "text" :name "username"}] [:br]
+             "password:" (password-field "password") [:br]
+             "email:" [:input {:type "text" :name "email"}] [:br]
+             (anti-forgery-field)
+             (submit-button "submit"))
+    (html [:br] [:br] (debug session)))))
 
 (defn index [session]
   (html (debug session) (link-to session "/login" "log-in" ))
