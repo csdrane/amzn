@@ -32,6 +32,6 @@
   (db-do-commands db (create-table-ddl :prices
                                             [:priceid :integer "PRIMARY KEY" "AUTO_INCREMENT"]
                                             [:productid :integer "references products (productid)"]
-                                            [:date "date"]
+                                            [:date "date" "UNIQUE"]
                                             [:price "decimal(7,2)"])))
 
