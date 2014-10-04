@@ -33,5 +33,5 @@
                                             [:priceid :integer "PRIMARY KEY" "AUTO_INCREMENT"]
                                             [:productid :integer "references products (productid)"]
                                             [:date "date"]
-                                            [:price "decimal"])))
+                                            [:price "decimal(7,2)"])))
 
