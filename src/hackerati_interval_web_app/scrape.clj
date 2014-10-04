@@ -38,8 +38,15 @@
   [url] 
   (second (re-matches price-regex (fetch-url url))))
 
+(defn get-price-from-urls
+  "URL should be from Amazon's mobile website
+  http://www.amazon.com/gp/aw/h.html"
+  [url-list] 
+  (pmap get-price-from-url url-list))
+
 (defn get-price-from-file 
-  "File should be HTML from Amazon's mobile website
+  "Created for testing purposes.
+  File should be HTML from Amazon's mobile website
   http://www.amazon.com/gp/aw/h.html"
   [file]
   (second (with-open [rdr (clojure.java.io/reader file)]          
