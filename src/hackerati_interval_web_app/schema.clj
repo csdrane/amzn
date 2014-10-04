@@ -34,15 +34,25 @@
   (belongs-to products {:fk :productid})
   (entity-fields :priceid :productid :date :price))
 
-
 ;;;;;;;;;;;;;;;;;;;; FUNCTIONS ;;;;;;;;;;;;;;;;;;;;
-
 
 ;; TODO duplicate URLs should just not create multiple productids,
 ;; only multiple actionids
 (defn add-link! [userid url]
   (let [productid ((insert products (values {:url url})) :generated_key)]
     (insert tracked-links (values {:userid userid :productid productid}))))
+
+(defn add-price! 
+  ([productid price] 
+     (add-price! productid (java.util.Date.) price))
+  ([productid date price]
+     (try 
+       (insert prices
+               (values {:productid productid
+                        :date date
+                        :price price}))
+       (catch com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException e "Error: date already exists!")
+       (catch Exception e "Warning: unidentified error " (.getMessage e))))) 
 
 (defn add-user! [username pw email]
   (insert users
