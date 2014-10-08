@@ -4,8 +4,10 @@
              [compojure.handler :as handler]
              [compojure.route :as route]
              [hackerati-interval-web-app.views :as views]
+             [ring.adapter.jetty :as jetty]
              [ring.middleware.defaults :refer :all]
-             [ring.middleware.session.cookie]))
+             [ring.middleware.session.cookie])
+  (:gen-class))
 
 (defroutes main-routes
   (GET "/" {session :session} (views/index session)) 
@@ -24,4 +26,9 @@
    (-> (assoc-in site-defaults [:security :anti-forgery] false)  
        (assoc-in [:store] (ring.middleware.session.cookie/cookie-store {:key "a 16-byte secret"})))))
 
- 
+(defn -main [& [port]]
+  (jetty/run-jetty app 
+         {:port (if port 
+                  (Integer/parseInt port)
+                  (Integer/parseInt (System/getenv "PORT")))}))
+

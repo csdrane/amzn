@@ -14,8 +14,8 @@
                  [ring/ring-defaults "0.1.1"]]
   :plugins [[lein-ring "0.8.11"]]
   :ring {:handler hackerati-interval-web-app.core/app}
-  :uberjar "amzn.jar"
   :main ^:skip-aot hackerati-interval-web-app.core
+  :aot [hackerati-interval-web-app.core]
   :target-path "target/%s"
   :resource-paths ["resources"]
   :profiles {:uberjar {:aot :all}
