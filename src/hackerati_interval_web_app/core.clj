@@ -1,7 +1,6 @@
 ; Run test server with `lein ring server-headless`
 (ns hackerati-interval-web-app.core
-  (:require  [cider.nrepl :refer (cider-nrepl-handler)]
-             [compojure.core :refer :all]
+  (:require  [compojure.core :refer :all]
              [compojure.handler :as handler]
              [compojure.route :as route]
              [hackerati-interval-web-app.views :as views]
