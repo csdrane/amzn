@@ -4,9 +4,11 @@
              [compojure.handler :as handler]
              [compojure.route :as route]
              [hackerati-interval-web-app.views :as views]
+             [hackerati-interval-web-app.schema :as db]
              [ring.adapter.jetty :as jetty]
              [ring.middleware.defaults :refer :all]
              [ring.middleware.session.cookie])
+  (:import (java.util.concurrent ScheduledThreadPoolExecutor TimeUnit)) 
   (:gen-class))
 
 (defroutes main-routes
@@ -26,8 +28,14 @@
    (-> (assoc-in site-defaults [:security :anti-forgery] false)  
        (assoc-in [:store] (ring.middleware.session.cookie/cookie-store {:key "a 16-byte secret"})))))
 
+(defn- scheduled-task [f]
+  (-> (ScheduledThreadPoolExecutor. 10)
+      (.scheduleAtFixedRate f 0 5 TimeUnit/SECONDS)))
+
+;; Scheduled task must go first, otherwise won't get executed.
 (defn -main [& [port]]
+  (scheduled-task db/refresh-prices)
   (jetty/run-jetty app 
-         {:port (if port 
-                  (Integer/parseInt port)
-                  (Integer/parseInt (System/getenv "PORT")))}))
+                   {:port (if port 
+                            (Integer/parseInt port)
+                            (Integer/parseInt (System/getenv "PORT")))}))

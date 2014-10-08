@@ -1,10 +1,7 @@
 (ns hackerati-interval-web-app.scrape
   (:require [clojure.string :as str]
             [hackerati-interval-web-app.schema :as db])
-  (:import (java.util.concurrent ScheduledThreadPoolExecutor TimeUnit)) 
   (:gen-class))
-
-
 
 (def ^:dynamic *user-agent*
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1944.0 Safari/537.36")
@@ -47,7 +44,7 @@
   "URL should be from Amazon's mobile website
   http://www.amazon.com/gp/aw/h.html"
   [& urls] 
-  ())
+  (apply pmap get-price-from-url urls))
 
 (defn get-price-from-file 
   "File should be HTML from Amazon's mobile website
@@ -70,7 +67,3 @@
         url-template "http://www.amazon.com/gp/aw/d/"]
     (str url-template product-id)))
 
-;; arbitrary thread size
-;; (do 
-;;   (-> (ScheduledThreadPoolExecutor. 10)
-;;       (.scheduleAtFixedRate #(println "testtt") 0 1 TimeUnit/SECONDS)))

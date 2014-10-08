@@ -1,5 +1,6 @@
 (ns hackerati-interval-web-app.schema
-  (:require [korma.db :refer :all]
+  (:require [hackerati-interval-web-app.scrape :as scrape]
+            [korma.db :refer :all]
             [korma.core :refer :all]
             [crypto.password.bcrypt :as password]))
 
@@ -69,19 +70,35 @@
        first
        :userid))
 
-(defn get-links [username]
-  (->> (select users 
-               (fields [:products.url]) 
-               (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
-               (join [products :products] {:products.productid :trackedlinks.productid}) 
-               (where {:username username}))
-       (map :url)))
+(defn get-links
+  ([] 
+     (->> (select products) 
+          (map :url)))
+  ([username]
+     (->> (select users 
+                  (fields [:products.url]) 
+                  (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
+                  (join [products :products] {:products.productid :trackedlinks.productid}) 
+                  (where {:username username}))
+          (map :url))))
 
 (defn get-user-pw [username]
   (->> (select users
                (where {:username username}))
        first
        :password))
+
+;; IN PROGRESS
+;; Currently returns e.g. {1 $18.44}
+;; Need to return {:productid 1 :price $18.44}
+(defn refresh-prices []
+  (let [products (select products)
+        ids (map :productid products)
+        urls (map :url products)
+        ps (scrape/get-price-from-urls urls)
+        m (map hash-map ids ps)]
+    (insert prices
+            (values m))))
 
 (defn user-exists? [username]
   (seq (select users (where {:username username}))))
