@@ -12,8 +12,9 @@
                  [mysql/mysql-connector-java "5.1.32"]
                  [ring "1.3.1"]
                  [ring/ring-defaults "0.1.1"]]
-  :plugins [[lein-ring "0.8.11"]]
-  :ring {:handler hackerati-interval-web-app.core/app}
+  :plugins [[lein-ring "0.8.12"]]
+  :ring {:handler hackerati-interval-web-app.core/app :port 3000 :main hackerati-interval-web-app.core}
+  :uberjar "amzn.jar"
   :main ^:skip-aot hackerati-interval-web-app.core
   :aot [hackerati-interval-web-app.core]
   :target-path "target/%s"
