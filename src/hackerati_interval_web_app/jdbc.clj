@@ -32,6 +32,7 @@
   (db-do-commands db (create-table-ddl :prices
                                             [:priceid :integer "PRIMARY KEY" "AUTO_INCREMENT"]
                                             [:productid :integer "references products (productid)"]
-                                            [:date "date" "UNIQUE"]
-                                            [:price "decimal(7,2)"])))
+                                            [:date "date"]
+                                            [:price "decimal(7,2)"]
+                                            :table-spec "constraint uc_price unqiue (productid, date)")))
 
