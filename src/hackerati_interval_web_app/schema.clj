@@ -44,7 +44,7 @@
     (insert tracked-links (values {:userid userid :productid productid}))))
 
 (defn add-price! 
-  ([productid price] 
+  ([{productid :productid price :price}] 
      (add-price! productid (java.util.Date.) price))
   ([productid date price]
      (try 
@@ -88,17 +88,16 @@
        first
        :password))
 
-;; IN PROGRESS
-;; Currently returns e.g. {1 $18.44}
-;; Need to return {:productid 1 :price $18.44}
+;; TODO refactor
 (defn refresh-prices []
   (let [products (select products)
         ids (map :productid products)
         urls (map :url products)
         ps (scrape/get-price-from-urls urls)
-        m (map hash-map ids ps)]
-    (insert prices
-            (values m))))
+        m (reduce #(conj %1 (assoc {} :productid (first %2) :price (second %2)))  [] (partition 2 (interleave ids ps)))]
+;; TODO optimize by including all values within one insert statement, instead of mapping across the bunch
+;; Although, one advantage of doing it this way is that one error doesn't ruin the whole insertion.
+    (map add-price! m)))
 
 (defn user-exists? [username]
   (seq (select users (where {:username username}))))
