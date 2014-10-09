@@ -1,6 +1,5 @@
 (ns hackerati-interval-web-app.scrape
-  (:require [clojure.string :as str]
-            [hackerati-interval-web-app.schema :as db])
+  (:require [clojure.string :as str])
   (:gen-class))
 
 (def ^:dynamic *user-agent*
@@ -37,8 +36,15 @@
 (defn get-price-from-url
   "URL should be from Amazon's mobile website
   http://www.amazon.com/gp/aw/h.html"
-  [url] 
-  (second (re-matches price-regex (fetch-url url))))
+  [url]
+  (let [parse-$ #(if (= (first %1) \$)
+                   (Float/parseFloat (apply str (rest %1)))
+                   (Float/parseFloat %1))] 
+    (->> url 
+         fetch-url
+         (re-matches price-regex) 
+         second
+         parse-$)))
 
 (defn get-price-from-urls
   "URL should be from Amazon's mobile website
