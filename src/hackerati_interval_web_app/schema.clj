@@ -97,7 +97,10 @@
         m (reduce #(conj %1 (assoc {} :productid (first %2) :price (second %2)))  [] (partition 2 (interleave ids ps)))]
 ;; TODO optimize by including all values within one insert statement, instead of mapping across the bunch
 ;; Although, one advantage of doing it this way is that one error doesn't ruin the whole insertion.
-    (map add-price! m)))
+   #_(println m)
+    (doseq [entry m]
+      #_(println entry)
+      (add-price! entry))))
 
 (defn user-exists? [username]
   (seq (select users (where {:username username}))))

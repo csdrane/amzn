@@ -30,7 +30,7 @@
 
 (defn- scheduled-task [f]
   (-> (ScheduledThreadPoolExecutor. 10)
-      (.scheduleAtFixedRate f 0 5 TimeUnit/SECONDS)))
+      (.scheduleAtFixedRate f 0 24 TimeUnit/HOURS)))
 
 ;; Scheduled task must go first, otherwise won't get executed.
 (defn -main [& [port]]
