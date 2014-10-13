@@ -76,14 +76,14 @@
 (defn get-links
   ([] 
      (->> (select products) 
-          (map :url)))
+          (map #(select-keys % [:url :description]))))
   ([username]
      (->> (select users 
                   (fields [:products.url]) 
                   (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
                   (join [products :products] {:products.productid :trackedlinks.productid}) 
                   (where {:username username}))
-          (map :url))))
+          (map #(select-keys % [:url :description] )))))
 
 (defn get-user-pw [username]
   (->> (select users
