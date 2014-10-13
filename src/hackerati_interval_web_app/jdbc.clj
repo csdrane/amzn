@@ -20,7 +20,9 @@
   (db-do-commands db (create-table-ddl :trackedlinks
                                             [:userid :integer "references users (userid)"]
                                             [:actionid :integer "PRIMARY KEY" "AUTO_INCREMENT"]
-                                            [:productid :integer "references products (productid)"]))) 
+                                            [:productid :integer "references products (productid)"]
+                                            ;; TODO add length validation/sanitization on input
+                                            [:description "varchar(100)"]))) 
 
 ;; URL datatype based on http://stackoverflow.com/questions/219569/best-database-field-type-for-a-url
 (defn create-products-table [db]

@@ -21,7 +21,7 @@
 (defentity tracked-links
   (table :trackedlinks)
   (pk :actionid)
-  (entity-fields :userid :actionid :productid)
+  (entity-fields :userid :actionid :productid :description)
   (belongs-to users {:fk :userid})
   (has-one products {:fk :productid}))
 
@@ -39,10 +39,13 @@
 
 ;; TODO duplicate URLs should just not create multiple productids,
 ;; only multiple actionids
-(defn add-link! [userid url]
-  (let [productid ((insert products (values {:url url})) :generated_key)]
-    (insert tracked-links (values {:userid userid :productid productid}))))
-
+(defn add-link!
+  ([userid url]
+     (add-link! userid url "Description not provided."))
+  ([userid url description]
+     (let [productid ((insert products (values {:url url})) :generated_key)]
+       (insert tracked-links (values {:userid userid :productid productid :description description})))))
+(add-link! 1 "test")
 (defn add-price! 
   ([{productid :productid price :price}] 
      (add-price! productid (java.util.Date.) price))
