@@ -12,7 +12,7 @@
   (:gen-class))
 
 (defroutes main-routes
-  (GET "/" {session :session} (views/index session)) 
+  (GET "/" request (views/index request)) 
   (GET "/login" {session :session}  (views/not-logged-in session))
   (POST "/login" request (views/login request))
   (POST "/register" request (views/attempt-register request))

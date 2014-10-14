@@ -62,7 +62,7 @@
                            (debug request)))
      :session (assoc session :username username)}))
  
-(defn not-logged-in [session] 
+(defn not-logged-in [request] 
   (site-template
    (html 
     (form-to [:post "/login"]
@@ -76,13 +76,14 @@
              "email:" [:input {:type "text" :name "email"}] [:br]
              (anti-forgery-field)
              (submit-button "submit"))
-    (html [:br] [:br] (debug session)))))
+    (html [:br] [:br] (debug request)))))
 
-(defn index [session]
-  (if (logged-in? session)
+(defn index [request]
+  (let [{session :session} request] 
+    (if (logged-in? session)
       (if (db/user-exists? (session :username))
-        (logged-in session))
-      (not-logged-in session)))
+        (logged-in request))
+      (not-logged-in request))))
 
 (defn login 
   [request]
