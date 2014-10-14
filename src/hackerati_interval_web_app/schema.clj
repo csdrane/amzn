@@ -73,17 +73,21 @@
        first
        :userid))
 
+;; Would like to refactor the redundancy from below using an if statement on whether a username is present. Was having trouble getting Korma to accept this though.
 (defn get-links
-  ([] 
-     (->> (select products) 
+  ([]
+     (->> (select users 
+                  (fields :products.url :trackedlinks.description) 
+                  (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
+                  (join [products :products] {:products.productid :trackedlinks.productid}))
           (map #(select-keys % [:url :description]))))
   ([username]
      (->> (select users 
-                  (fields [:products.url]) 
+                  (fields :products.url :trackedlinks.description) 
                   (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
                   (join [products :products] {:products.productid :trackedlinks.productid}) 
                   (where {:username username}))
-          (map #(select-keys % [:url :description] )))))
+          (map #(select-keys % [:url :description])))))
 
 (defn get-user-pw [username]
   (->> (select users

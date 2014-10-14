@@ -44,9 +44,12 @@
 (db/add-user! "nick" "nick-pw" "baz@bar.com")
 (db/add-user! "andy" "andy-pw" "blick@blat.net")
 
-(doseq [url ["http://foo.com" "http://baz.com" "http://bar.com"]
+(let [urls [["http://foo.com" "Description 1"] 
+             ["http://baz.com" "Description 2"] 
+             ["http://bar.com" "Description 3"]]
         userid (map db/get-user-id ["chris" "nick" "andy"])]
-  (db/add-link! userid url))
+  (doseq [links (mapv (comp flatten vector) userid urls)] 
+    (apply db/add-link! links)))
 
 ;;;;;;;;;;;;;;;;;;;; TESTS  ;;;;;;;;;;;;;;;;;;;;
 
@@ -55,9 +58,11 @@
               (kcore/select db/users))
          ["chris" "nick" "andy"])))
 
+
+;;;; TODO add test case to return all links
 (deftest get-links-test
   (is (= (db/get-links "chris")
-         ["http://foo.com" "http://baz.com" "http://bar.com"])))
+         (list {:url "http://foo.com" :description "Description 1"}))))
 
 (deftest user-exists?-test
   (is (some? (db/user-exists? "chris")))
