@@ -49,8 +49,10 @@
 (defn get-price-from-urls
   "URL should be from Amazon's mobile website
   http://www.amazon.com/gp/aw/h.html"
-  [& urls] 
-  (apply pmap get-price-from-url urls))
+  [& urls]
+  (do 
+    #_(println urls) 
+    (apply pmap get-price-from-url urls)))
 
 (defn get-price-from-file 
   "File should be HTML from Amazon's mobile website
