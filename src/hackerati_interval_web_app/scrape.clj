@@ -21,16 +21,14 @@
   #"(?s).*?<b>Price.*?(\$\d+\.?\d*).*")
 
 (defn fetch-url [url]
-  (with-open [inputstream  (-> (java.net.URL. url)
-                               .openConnection
-                               (doto (.setRequestProperty "Accept" *accept*)
-                                 (.setRequestProperty "User-Agent"
-                                                      *user-agent*)
-                                (.setRequestProperty "Accept-Encoding"
-                                                     *accept-encoding*)
-                                (.setRequestProperty "Accept-Language"
-                                                     *accept-language*))
-                               .getContent)]
+  (with-open [inputstream  
+              (-> (java.net.URL. url)
+                  .openConnection
+                  (doto (.setRequestProperty "Accept" *accept*)
+                    (.setRequestProperty "User-Agent" *user-agent*)
+                    (.setRequestProperty "Accept-Encoding" *accept-encoding*)
+                    (.setRequestProperty "Accept-Language" *accept-language*))
+                  .getContent)]
     (slurp inputstream)))
 
 (defn get-price-from-url
@@ -40,11 +38,12 @@
   (let [parse-$ #(if (= (first %1) \$)
                    (Float/parseFloat (apply str (rest %1)))
                    (Float/parseFloat %1))] 
-    (->> url 
-         fetch-url
-         (re-matches price-regex) 
-         second
-         parse-$)))
+    (try (->> url 
+              fetch-url
+              (re-matches price-regex) 
+              second
+              parse-$)
+         (catch Exception e (str "Warning: couldn't not fetch price for " url)))))
 
 (defn get-price-from-urls
   "URL should be from Amazon's mobile website
