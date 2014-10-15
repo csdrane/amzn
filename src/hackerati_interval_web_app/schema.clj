@@ -45,7 +45,7 @@
   ([userid url description]
      (let [productid ((insert products (values {:url url})) :generated_key)]
        (insert tracked-links (values {:userid userid :productid productid :description description})))))
-(add-link! 1 "test")
+
 (defn add-price! 
   ([{productid :productid price :price}] 
      (add-price! productid (java.util.Date.) price))
@@ -67,6 +67,12 @@
 ;; TODO
 ;; (defn delete-user [username])
 
+;; TODO
+(defn authorized-link?
+  "Returns true if username and actionid exist together in DB. Eventually want to replace username with userid." 
+  [username actionid]
+  true)
+
 (defn get-user-id [username]
   (->> (select users
                (where {:username username}))
@@ -77,17 +83,22 @@
 (defn get-links
   ([]
      (->> (select users 
-                  (fields :products.url :trackedlinks.description) 
+                  (fields :products.url :products.productid :trackedlinks.description) 
                   (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
                   (join [products :products] {:products.productid :trackedlinks.productid}))
           (map #(select-keys % [:url :description]))))
   ([username]
      (->> (select users 
-                  (fields :products.url :trackedlinks.description) 
+                  (fields :products.url :products.productid :trackedlinks.description) 
                   (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
                   (join [products :products] {:products.productid :trackedlinks.productid}) 
                   (where {:username username}))
-          (map #(select-keys % [:url :description])))))
+          (map #(select-keys % [:url :description :productid])))))
+
+(defn get-prices [productid]
+  (->> (select prices
+               (where {:productid productid}))
+       (map #(select-keys % [:date :price]))))
 
 (defn get-user-pw [username]
   (->> (select users
@@ -96,6 +107,7 @@
        :password))
 
 ;; TODO refactor
+;; Using ids and ps to respectively only represent productids and prices makes this function fragile. If a get-price fails it will corrupt the results for successive entries.
 (defn refresh-prices []
   (let [products (select products)
         ids (map :productid products)

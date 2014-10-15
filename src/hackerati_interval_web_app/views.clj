@@ -40,15 +40,24 @@
     [:div {:class "container-fixed"} 
      [:h1 "amzn scrpr"] h]]))
 
-(defn- tracked-links-html [username]
-  (html
-   [:div  
-    [:table {:class "table table-striped"}
-     [:tbody 
-      (for [url (db/get-links username)]
-        [:tr
-         [:td
-          [:a {:href url} url]]])]]]))
+(defn link-view 
+  "Display prices after clicking on tracked link"
+  [request]
+  (let [{session :session} request
+        {username :username} session
+        {params :params} request
+        {productid :productid} params]
+    (site-template
+     (if (db/authorized-link? username productid) 
+       (html
+        [:div
+         [:table {:class "table table-striped table-condensed"}
+          [:thead
+           [:tr [:th "Date"] [:th "Price"]]
+           [:tbody
+            (for [{date :date price :price} (db/get-prices productid)]
+              [:tr [:td date] [:td price]])]]]] [:a {:href "/"} "back"])
+       (html [:h1 "Not authorized for access!"])))))
 
 (defn logged-in? [session]
   (contains? session :username))

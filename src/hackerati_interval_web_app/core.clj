@@ -12,7 +12,8 @@
   (:gen-class))
 
 (defroutes main-routes
-  (GET "/" request (views/index request)) 
+  (GET "/" request (views/index request))
+  (GET "/link/:productid" request (views/link-view request))
   (GET "/login" {session :session}  (views/not-logged-in session))
   (POST "/login" request (views/login request))
   (POST "/register" request (views/attempt-register request))
