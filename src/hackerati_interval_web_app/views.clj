@@ -34,8 +34,10 @@
   (html5 
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
    (include-bootstrap)
+   (include-js "/main.js")
+   (include-css "/main.css")
    [:body
-    [:div {:class "container"} 
+    [:div {:class "container-fixed"} 
      [:h1 "amzn scrpr"] h]]))
 
 (defn- tracked-links-html [username]
@@ -51,6 +53,22 @@
 (defn logged-in? [session]
   (contains? session :username))
 
+(defn- tracked-links-html [username]
+  (html
+   [:div
+    [:table {:class "table table-striped table-condensed"}
+     [:thead [:tr [:th "Link to Amazon"] [:th "Description"] [:th {:class "delete-button"}]]]
+     [:tbody
+      (for [{url :url 
+             description :description
+             productid :productid} 
+            (db/get-links username)]
+        [:tr
+         [:td [:a {:href url} url]]
+         [:td [:a {:href (str "link/" productid)} description]]
+         [:td {:class "delete-button"} [:button {:type "button" :class "close"} "&times;"]]])]]]))
+
+;; TODO add third column that uses bootstrap's Close icon
 (defn logged-in [request]
   (let [username (get-username-from-request-map request)
         {session :session} request]
@@ -59,6 +77,7 @@
      :body (site-template (html 
                            [:h3 "Links you're following, " (str username)] [:br] [:br]
                            (tracked-links-html username)
+                           [:a {:href "" :class "edit-links"} "edit"] [:br]
                            (debug request)))
      :session (assoc session :username username)}))
  
