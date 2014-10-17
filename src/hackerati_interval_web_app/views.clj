@@ -28,6 +28,17 @@
     (if-let [username (-> request :params :username)]
       username)))
 
+;; TODO add message indicating successful operation; currently returns 404
+(defn delete-link! [request]
+  (let [{session :session} request
+        {username :username} session
+        {params :params} request
+        {actionid :actionid} params]
+    (if (db/authorized-link? {:username username :actionid actionid})
+      (try  
+        (db/delete-link! username actionid)
+        (catch Exception e "Error: deletion failed!")))))
+
 (defhtml site-template
   "Takes hiccup html and wraps it in site-global template" 
   [h] 
@@ -48,7 +59,7 @@
         {params :params} request
         {productid :productid} params]
     (site-template
-     (if (db/authorized-link? username productid) 
+     (if (db/authorized-link? {:username username :productid productid}) 
        (html
         [:div
          [:table {:class "table table-striped table-condensed"}
@@ -70,9 +81,10 @@
      [:tbody
       (for [{url :url 
              description :description
-             productid :productid} 
+             productid :productid
+             actionid :actionid} 
             (db/get-links username)]
-        [:tr
+        [:tr {:id actionid}
          [:td [:a {:href url} url]]
          [:td [:a {:href (str "link/" productid)} description]]
          [:td {:class "delete-button"} 

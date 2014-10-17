@@ -13,6 +13,7 @@
 
 (defroutes main-routes
   (GET "/" request (views/index request))
+  (POST "/delete-link" request (views/delete-link! request))
   (GET "/link/:productid" request (views/link-view request))
   (GET "/login" {session :session}  (views/not-logged-in session))
   (POST "/login" request (views/login request))

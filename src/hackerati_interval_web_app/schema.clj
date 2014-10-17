@@ -70,8 +70,20 @@
 ;; TODO
 (defn authorized-link?
   "Returns true if username and actionid exist together in DB. Eventually want to replace username with userid." 
-  [username actionid]
+  [auth-map]
   true)
+
+(defn delete-link! 
+  [username actionid]
+  (let [link-map (first (select tracked-links
+                                (join [users :users] {:users.userid :trackedlinks.userid})
+                                (where {:actionid actionid})))
+        user-map (first (select users 
+                                (where {:username username})))]
+    (if (apply = (map :userid [link-map user-map]))
+      (delete tracked-links 
+              (where {:actionid actionid}))
+      (println "Deletion failed: not authorized! " link-map user-map))))
 
 (defn get-user-id [username]
   (->> (select users
@@ -83,17 +95,17 @@
 (defn get-links
   ([]
      (->> (select users 
-                  (fields :products.url :products.productid :trackedlinks.description) 
+                  (fields :products.url :products.productid :trackedlinks.description :trackedlinks.actionid) 
                   (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
                   (join [products :products] {:products.productid :trackedlinks.productid}))
-          (map #(select-keys % [:url :description]))))
+          (map #(select-keys % [:url :description :productid :actionid]))))
   ([username]
      (->> (select users 
-                  (fields :products.url :products.productid :trackedlinks.description) 
+                  (fields :products.url :products.productid :trackedlinks.description :trackedlinks.actionid) 
                   (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid}) 
                   (join [products :products] {:products.productid :trackedlinks.productid}) 
                   (where {:username username}))
-          (map #(select-keys % [:url :description :productid])))))
+          (map #(select-keys % [:url :description :productid :actionid])))))
 
 (defn get-prices [productid]
   (->> (select prices
