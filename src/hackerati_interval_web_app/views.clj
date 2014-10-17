@@ -65,7 +65,7 @@
 (defn- tracked-links-html [username]
   (html
    [:div
-    [:table {:class "table table-striped table-condensed"}
+    [:table {:class "table table-striped table-condensed" :id "links-table"}
      [:thead [:tr [:th "Link to Amazon"] [:th "Description"] [:th {:class "delete-button"}]]]
      [:tbody
       (for [{url :url 
@@ -75,7 +75,9 @@
         [:tr
          [:td [:a {:href url} url]]
          [:td [:a {:href (str "link/" productid)} description]]
-         [:td {:class "delete-button"} [:button {:type "button" :class "close"} "&times;"]]])]]]))
+         [:td {:class "delete-button"} 
+           [:button {:type "button" :class "close" 
+                     :onclick "deleteRow(this)"} "&times;"]]])]]]))
 
 ;; TODO add third column that uses bootstrap's Close icon
 (defn logged-in [request]
