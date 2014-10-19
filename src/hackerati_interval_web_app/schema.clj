@@ -118,43 +118,15 @@
        first
        :password))
 
-;; TODO refactor
-;; Using ids and ps to respectively only represent productids and prices makes this function fragile. If a get-price fails it will corrupt the results for successive entries.
 (defn refresh-prices []
   (let [products (select products)
-        ids (map :productid products)
-        urls (map :url products)
-        ps (apply scrape/get-price-from-urls urls)
-        m (reduce #(conj %1 (assoc {} :productid (first %2) :price (second %2)))  [] (partition 2 (interleave ids ps)))]
-;; TODO optimize by including all values within one insert statement, instead of mapping across the bunch
-;; Although, one advantage of doing it this way is that one error doesn't ruin the whole insertion.
-   #_(println m)
-    (doseq [entry m]
-      #_(println entry)
-      (add-price! entry)))) 
-
-;; test ;;
-
-;; working proof of concept--retrieves one item's price
-(time (let [agents (list (agent 1))
-       products (select products)
-       urls (map :url products)
-       url (first urls)]
-   (doseq [a agents]
-     (send-off a (fn [_] (scrape/get-price-from-url url)))) 
-   (doseq [a agents]
-     (await-for 4000 a))
-   (doseq [a agents]
-     (print @a))))
-
-;; demo code from JoC p. 252
-(time (let [agents (map #(agent %) (range 10))]
-   (doseq [a agents]
-     (send-off a (fn [_] (Thread/sleep 1000))))
-   (doseq [a agents]
-     (await-for 1000 a))))
-
-;; test ;;
+        agents (map #(agent %) (range (count products)))]
+    (doseq [a agents]
+      (send-off a (fn [_] (hash-map :productid (:productid (nth products @a)) :price (scrape/get-price-from-url (:url (nth products @a))))))) 
+    (doseq [a agents]
+      (await-for 4000 a))
+    (doseq [a agents]
+      (add-price! @a))))
 
 (defn user-exists? [username]
   (seq (select users (where {:username username}))))
