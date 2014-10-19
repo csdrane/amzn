@@ -133,6 +133,29 @@
       #_(println entry)
       (add-price! entry)))) 
 
+;; test ;;
+
+;; working proof of concept--retrieves one item's price
+(time (let [agents (list (agent 1))
+       products (select products)
+       urls (map :url products)
+       url (first urls)]
+   (doseq [a agents]
+     (send-off a (fn [_] (scrape/get-price-from-url url)))) 
+   (doseq [a agents]
+     (await-for 4000 a))
+   (doseq [a agents]
+     (print @a))))
+
+;; demo code from JoC p. 252
+(time (let [agents (map #(agent %) (range 10))]
+   (doseq [a agents]
+     (send-off a (fn [_] (Thread/sleep 1000))))
+   (doseq [a agents]
+     (await-for 1000 a))))
+
+;; test ;;
+
 (defn user-exists? [username]
   (seq (select users (where {:username username}))))
 
