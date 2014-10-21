@@ -126,6 +126,8 @@
     (doseq [a agents]
       (await-for 4000 a))
     (doseq [a agents]
+      (.println System/out @a))
+    (doseq [a agents]
       (add-price! @a))))
 
 (defn user-exists? [username]

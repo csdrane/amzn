@@ -13,11 +13,13 @@
 (defn debug [x]
   (if *debug-mode* (str x)))
 
-(defn- include-bootstrap []
+(defn- load-requirements []
   (list
    (include-css "/bootstrap/css/bootstrap.min.css")
+   (include-css "/bootstrap3-editable/css/bootstrap-editable.css")
    (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
-   (include-js "/bootstrap/js/bootstrap.min.js")))
+   (include-js "/bootstrap/js/bootstrap.min.js")
+   (include-js "/bootstrap3-editable/js/bootstrap-editable.min.js")))
 
 (defn- get-username-from-request-map [request]
   {:pre [(or (contains? (request :session) :username)
@@ -44,7 +46,7 @@
   [h] 
   (html5 
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-   (include-bootstrap)
+   (load-requirements)
    (include-js "/main.js")
    (include-css "/main.css")
    [:body
@@ -100,7 +102,12 @@
      :body (site-template (html 
                            [:h3 "Links you're following, " (str username)] [:br] [:br]
                            (tracked-links-html username)
-                           [:a {:href "" :class "edit-links"} "edit"] [:br]
+                           [:div {:class "small" :id "editing-fields"} 
+                             [:a {:href "#" :class "add-links"} "add"] 
+                             " " 
+                             [:a {:href "#" :class "edit-links"} "edit"]] 
+                           [:br]
+                           [:div {:id "msg" :class "alert hide"}]
                            (debug request)))
      :session (assoc session :username username)}))
  
