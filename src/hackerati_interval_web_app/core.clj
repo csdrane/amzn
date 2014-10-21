@@ -1,4 +1,6 @@
 ; Run test server with `lein ring server-headless`
+; Run -main with `lein run 3000`
+; If lein run is crashing, you are probably forgetting the port number.
 (ns hackerati-interval-web-app.core
   (:require  [compojure.core :refer :all]
              [compojure.handler :as handler]
@@ -17,6 +19,7 @@
   (GET "/link/:productid" request (views/link-view request))
   (GET "/login" {session :session}  (views/not-logged-in session))
   (POST "/login" request (views/login request))
+  (POST "/newlink" request (str request))
   (POST "/register" request (views/attempt-register request))
   (GET "/test" request (views/session-test request))
   (route/resources "/bootstrap")
@@ -36,8 +39,13 @@
 
 ;; Scheduled task must go first, otherwise won't get executed.
 (defn -main [& [port]]
-  (scheduled-task db/refresh-prices)
-  (jetty/run-jetty app 
-                   {:port (if port 
-                            (Integer/parseInt port)
-                            (Integer/parseInt (System/getenv "PORT")))}))
+  (if-let [port (try 
+                  (Integer/parseInt port) 
+                  (catch Exception e))] 
+    (do
+      (System/setProperty "java.awt.headless" "true")
+      (scheduled-task db/refresh-prices)
+      (jetty/run-jetty app 
+                      {:port port :auto-reload? true}))
+    (println "Useage: lein run port")))
+
