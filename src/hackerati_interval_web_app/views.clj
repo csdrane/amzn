@@ -1,12 +1,14 @@
 (ns hackerati-interval-web-app.views
-  (:require [hackerati-interval-web-app.schema :as db]
+  (:require [clojure.data.json :as json] 
+            [hackerati-interval-web-app.schema :as db]
             [korma.core :as k]
             [hiccup.core :refer :all]
             [hiccup.def :refer :all]
             [hiccup.element :refer :all]
             [hiccup.form :refer :all]
             [hiccup.page :refer :all]
-            [ring.util.anti-forgery :refer :all]))
+            [ring.util.anti-forgery :refer :all])
+  (:use [ring.util.response :only [response]]))
 
 (def ^:dynamic *debug-mode* false)
 
@@ -38,7 +40,8 @@
         {actionid :actionid} params]
     (if (db/authorized-link? {:username username :actionid actionid})
       (try  
-        (db/delete-link! username actionid)
+        (do (db/delete-link! username actionid)
+            (str "Delete link successful!"))
         (catch Exception e "Error: deletion failed!")))))
 
 (defhtml site-template
@@ -69,7 +72,7 @@
            [:tr [:th "Date"] [:th "Price"]]
            [:tbody
             (for [{date :date price :price} (db/get-prices productid)]
-              [:tr [:td date] [:td price]])]]]] [:a {:href "/"} "back"])
+              [:tr [:td date] [:td price]])]]]] [:a {:href "/" :class "small"} "back"])
        (html [:h1 "Not authorized for access!"])))))
 
 (defn logged-in? [session]
@@ -110,7 +113,27 @@
                            [:div {:id "msg" :class "alert hide"}]
                            (debug request)))
      :session (assoc session :username username)}))
- 
+
+;; TODO
+(defn valid-link? [link]
+  true)
+
+(defn new-link [request] 
+  (let [{session :session} request
+        {params :params} request
+        {link :link} params
+        {description :description} params
+        {username :username} session]
+    (if (valid-link? link)
+      (try 
+        (assoc (response {:success true 
+                          :actionid (:generated_key 
+                                     (db/add-link! 
+                                      (db/get-user-id username) link description))})
+          :headers {"Content-Type" "text/javascript;charset=UTF-8"})
+        (catch Exception e (str "Add link failed! " e)))
+      (str "Not a valid link!"))))
+
 (defn not-logged-in [request] 
   (site-template
    (html 

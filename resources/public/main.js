@@ -53,15 +53,34 @@ function addRow()
     	$('.new-link-param').editable('submit', {
     	    url: '/newlink', 
     	    ajaxOptions: {
-		type: 'post'
+		type: 'post',
+		dataType: 'json'
     	    },
+	    // .. not passing if stmt for some reason 
+	    // try using json lib
     	    success: function (data, config) {
-    		console.log("success!");
+		console.log(JSON.stringify(data));
+		console.log(data.actionid);
+		console.log(typeof data);
+    		if(data && data.actionid){ // assumes response like {"actionid": 2}
+		    $(this).editable('option', 'actionid', data.actionid);
+		    $(this).removeClass('editable-unsaved');
+		    var msg = "Link saved.";
+		    $('#msg').addClass('alert-success').removeClass('hide').removeClass('alert-error').html(msg).show();
+		    $(this).off('save.newuser');
+		}
+		else if(data && data.errors){
+		    config.error.call(this, data.errors); 
+		}
     	    },
     	    error: function(errors) {
+		var msg = "";
+		if(errors && errors.responseText){
+		    msg = errors.responseText;
+		} else {
     		console.log("Error: " + errors.responseText);
-    	    }
-    	}).editable('destroy').removeClass().removeAttr('id').parent().parent().children("button").remove();
+    		}
+    	    }}).editable('destroy').removeClass().removeAttr('id').parent().parent().children("button").remove();
     });
 }
 

@@ -10,6 +10,7 @@
              [ring.adapter.jetty :as jetty]
              [ring.middleware.defaults :refer :all]
              [ring.middleware.session.cookie])
+  (:use [ring.middleware.json :only [wrap-json-response]])
   (:import (java.util.concurrent ScheduledThreadPoolExecutor TimeUnit)) 
   (:gen-class))
 
@@ -19,19 +20,21 @@
   (GET "/link/:productid" request (views/link-view request))
   (GET "/login" {session :session}  (views/not-logged-in session))
   (POST "/login" request (views/login request))
-  (POST "/newlink" request (str request))
+  (POST "/newlink" request (views/new-link request))
   (POST "/register" request (views/attempt-register request))
-  (GET "/test" request (views/session-test request))
+  (GET "/test" request (str "{\"foo\": \"bar\"}"))
   (route/resources "/bootstrap")
   (route/not-found "<h1>Page not found</h1>"))
 
 ;; TODO Add back anti-forgery when site goes live.
 ;; TODO replace cookie key
 (def app
-  (wrap-defaults 
-   (handler/site main-routes)
-   (-> (assoc-in site-defaults [:security :anti-forgery] false)  
-       (assoc-in [:store] (ring.middleware.session.cookie/cookie-store {:key "a 16-byte secret"})))))
+  (wrap-json-response
+   (wrap-defaults
+    (handler/site main-routes)
+     (-> (assoc-in site-defaults [:security :anti-forgery] false)  
+         (assoc-in [:store] (ring.middleware.session.cookie/cookie-store {:key "a 16-byte secret"}))))
+   :pretty))
 
 (defn- scheduled-task [f]
   (-> (ScheduledThreadPoolExecutor. 10)
