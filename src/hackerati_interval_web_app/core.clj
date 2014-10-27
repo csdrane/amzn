@@ -22,7 +22,7 @@
   (POST "/login" request (views/login request))
   (POST "/newlink" request (views/new-link request))
   (POST "/register" request (views/attempt-register request))
-  (GET "/test" request (str "{\"foo\": \"bar\"}"))
+  (GET "/csv/:productid" [productid] (views/chart-csv productid))
   (route/resources "/bootstrap")
   (route/not-found "<h1>Page not found</h1>"))
 
@@ -42,7 +42,6 @@
 
 ;; Scheduled task must go first, otherwise won't get executed.
 (defn -main
-  ([] (-main 3000))
   ([port]
      (if-let [port (try 
                      (Integer/parseInt port) 

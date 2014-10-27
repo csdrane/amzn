@@ -1,5 +1,6 @@
 (ns hackerati-interval-web-app.views
-  (:require [clojure.data.json :as json] 
+  (:require [clojure.data.csv :as csv] 
+            [clojure.data.json :as json] 
             [hackerati-interval-web-app.schema :as db]
             [korma.core :as k]
             [hiccup.core :refer :all]
@@ -8,7 +9,10 @@
             [hiccup.form :refer :all]
             [hiccup.page :refer :all]
             [ring.util.anti-forgery :refer :all])
-  (:use [ring.util.response :only [response]]))
+  (:use [ring.util.response :only [response]])
+  (:import java.io.StringWriter))
+
+
 
 (def ^:dynamic *debug-mode* false)
 
@@ -31,6 +35,22 @@
     username
     (if-let [username (-> request :params :username)]
       username)))
+
+(defn chart-csv [productid]
+  "Serves CSV for use in chart."
+  (let [data (db/get-prices productid)
+        columns [:date :price]
+        headers (map name columns)
+        rows (mapv #(mapv % columns) data)]
+    (with-open [s (StringWriter.)]
+      (csv/write-csv s (cons headers rows))
+      (str s))))
+
+;; (defn chart-test [] 
+;;   (html5
+;;    [:div {:id "graphdiv"}]
+;;    (include-js "/dygraph-combined.js")
+;;    (include-js "/amzn-chart.js")))
 
 ;; TODO add message indicating successful operation; currently returns 404
 (defn delete-link! [request]
@@ -66,13 +86,17 @@
     (site-template
      (if (db/authorized-link? {:username username :productid productid}) 
        (html
+        [:div {:id "graphdiv" :productid productid}]
         [:div
          [:table {:class "table table-striped table-condensed"}
           [:thead
            [:tr [:th "Date"] [:th "Price"]]
            [:tbody
             (for [{date :date price :price} (db/get-prices productid)]
-              [:tr [:td date] [:td price]])]]]] [:a {:href "/" :class "small"} "back"])
+              [:tr [:td date] [:td price]])]]]] 
+        [:a {:href "/" :class "small"} "back"] 
+        (include-js "/dygraph-combined.js") 
+        (include-js "/amzn-chart.js"))
        (html [:h1 "Not authorized for access!"])))))
 
 (defn logged-in? [session]
