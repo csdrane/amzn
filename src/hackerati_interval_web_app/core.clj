@@ -41,15 +41,14 @@
       (.scheduleAtFixedRate f 0 24 TimeUnit/HOURS)))
 
 ;; Scheduled task must go first, otherwise won't get executed.
-(defn -main
-  ([port]
-     (if-let [port (try 
-                     (Integer/parseInt port) 
-                     (catch Exception e))] 
-       (do
-         (System/setProperty "java.awt.headless" "true")
-         (scheduled-task db/refresh-prices)
-         (jetty/run-jetty app 
-                          {:port port :auto-reload? true}))
-       (println "Useage: lein run port"))))
+(defn -main [& [port]]
+  (if-let [port (try 
+                  (Integer/parseInt port) 
+                  (catch Exception e))] 
+    (do
+      (System/setProperty "java.awt.headless" "true")
+      (scheduled-task db/refresh-prices)
+      (jetty/run-jetty app 
+                       {:port port :auto-reload? true}))
+    (println "Useage: lein run port")))
 

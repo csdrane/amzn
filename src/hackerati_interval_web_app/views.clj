@@ -160,18 +160,19 @@
 
 (defn not-logged-in [request] 
   (site-template
-   (html 
-    (form-to [:post "/login"]
-             "username:" [:input {:type "text" :name "username"}] [:br]
-             "password:" (password-field "password") [:br]
-             (submit-button "log in"))
-    (html [:br] [:br])
-    (form-to [:post "/register"]
-             "username:" [:input {:type "text" :name "username"}] [:br]
-             "password:" (password-field "password") [:br]
-             "email:" [:input {:type "text" :name "email"}] [:br]
-             (anti-forgery-field)
-             (submit-button "submit"))
+   (html [:div {:class "logged-out-container"}
+          (form-to [:post "/login"]
+                   [:p [:label "username:"] [:input {:type "text" :name "username"}]] [:br]
+                   [:p [:label "password:"] (password-field "password")] [:br]
+                   (submit-button "log in"))]
+    [:br] [:br]
+    [:div {:class "logged-out-container"} 
+     (form-to [:post "/register"]
+              [:p [:label "username:"] [:input {:type "text" :name "username"}]] [:br]
+              [:p [:label "password:"] (password-field "password")] [:br]
+              [:p [:label "email:"] [:input {:type "text" :name "email"}]] [:br]
+              (anti-forgery-field)
+              (submit-button "submit"))]
     (html [:br] [:br] (debug request)))))
 
 (defn index [request]

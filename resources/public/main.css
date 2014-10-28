@@ -1,3 +1,8 @@
+.logged-out-container form { display: table; }
+.logged-out-container p { display: table-row; }
+.logged-out-container label { display: table-cell; }
+.logged-out-container input { display: table-cell; }
+
 .container-fixed {
   margin: 0 auto;
   max-width: 970px;
