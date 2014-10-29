@@ -119,19 +119,19 @@
        :password))
 
 (defn refresh-prices []
-  (let [products (select products)
-        agents (map #(agent %) (range (count products)))]
-    (doseq [a agents]
-      (send-off a (fn [_] (hash-map :productid (:productid (nth products @a)) :price (scrape/get-price-from-url (:url (nth products @a))))))) 
-    (doseq [a agents]
-      (await-for 4000 a))
-    (doseq [a agents]
-      (.println System/out @a))
-    (doseq [a agents]
-      (add-price! @a))))
+  (try 
+    (let [products (select products)
+         agents (map #(agent %) (range (count products)))]
+     (doseq [a agents]
+       (send-off a (fn [_] (hash-map :productid (:productid (nth products @a)) :price (scrape/get-price-from-url (:url (nth products @a))))))) 
+     (doseq [a agents]
+       (await-for 4000 a))
+     (doseq [a agents]
+       (.println System/out @a))
+     (doseq [a agents]
+       (add-price! @a)))
+    (catch Exception e (str "Error refreshing prices: " e))))
 
-(defn user-exists? [username]
-  (seq (select users (where {:username username}))))
 
 (defn valid-user? [username password]
   (if (user-exists? username)
