@@ -121,29 +121,20 @@
         (catch Exception e (str "Add link failed! " e)))
       (str "Not a valid link!"))))
 
-(defn input-field [n]
-  [:input {:type "text" :name n}])
-
-(defn input-field-with-label [n]
-  [:p [:label (str n \:)] (input-field n)])
-
-(defn password-field-with-label [n]
-  [:p [:label (str n \:)] (password-field n)])
-
-(defn not-logged-in [& {:keys [message] :or {message ""}}] 
+(defn logged-out [& {:keys [message] :or {message ""}}] 
   "View of site when not logged in. Accepts optional request parameter for use when debugging is enabled."
   (template/site-template
    (html [:div {:class "logged-out-container"}
           (form-to [:post "/login"]
-                   (input-field-with-label "username") 
-                   (password-field-with-label "password")
+                   (template/input-field-with-label "username") 
+                   (template/password-field-with-label "password")
                    (submit-button "log in"))]
     [:br] [:br]
     [:div {:class "logged-out-container"} 
      (form-to [:post "/register"]
-              (input-field-with-label "username")
-              (password-field-with-label "password")
-              (input-field-with-label "email")
+              (template/input-field-with-label "username")
+              (template/password-field-with-label "password")
+              (template/input-field-with-label "email")
               (anti-forgery-field)
               (submit-button "submit"))]
     [:br] [:br] 
@@ -153,12 +144,11 @@
 (defn index [request]
   (let [{session :session} request] 
     (if (logged-in? session)
-      (if (db/user-exists? (session :username))
+      (if (db/exists? :username (session :username))
         (logged-in request))
-      (not-logged-in))))
+      (logged-out))))
 
-(defn login 
-  [request]
+(defn login [request]
   (let [{params :params} request
         {username :username} params  
         {password :password} params
@@ -166,26 +156,27 @@
         message "Error: username/password invalid!"]
     (if (db/valid-user? username password)
       (logged-in request)
-      (not-logged-in :message message))))
+      (logged-out :message message))))
+
+(defn email-exists []
+  (logged-out :message "Sorry, email already exists!"))
 
 (defn registration-failed []
-  (->> [:h2 "Sorry, registration failed!"]
-       template/site-template))
-
-(defn user-exists []
-  (->> [:h2 "Sorry, user exists!"]
-       template/site-template))
+  (logged-out :message "Sorry, registration failed!"))
 
 (defn registration-successful []
-  (->> [:h2 "Registration successful!"]
-       template/site-template))
+  (logged-out :message "Registration successful!"))
+
+(defn user-exists []
+  (logged-out :message "Sorry, user exists!"))
 
 (defn attempt-register [{params :params}]
   (let [username (:username params)
        pw (:password params)
        email (:email params)]
-   (if (db/user-exists? username)
-     (user-exists)
-    (do
-      (db/add-user! username pw email)
-      (registration-successful)))))
+    (cond 
+     (db/exists? :username  username) (user-exists)
+     (db/exists? :email email) (email-exists)
+     :else (do
+             (db/add-user! username pw email)
+             (registration-successful)))))

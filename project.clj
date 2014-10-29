@@ -17,8 +17,9 @@
                  [ring/ring-json "0.3.1"]]
   :plugins [[lein-ring "0.8.12"]]
   :ring {:handler hackerati-interval-web-app.core/app :port 3000 :main hackerati-interval-web-app.core}
-  :uberjar "amzn.jar"
+  :uberjar-name "amzn.jar"
   :main ^:skip-aot hackerati-interval-web-app.core
+  :min-lein-version "2.0.0"
   :aot [hackerati-interval-web-app.core]
   :target-path "target/%s"
   :resource-paths ["resources"]

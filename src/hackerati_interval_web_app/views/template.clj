@@ -1,5 +1,6 @@
 (ns hackerati-interval-web-app.views.template
   (:require [hiccup.def :refer :all]
+            [hiccup.form :refer :all]
             [hiccup.page :refer :all]))
 
 (defn- load-css []
@@ -25,3 +26,12 @@
     [:div {:class "container-fixed"} 
      [:h1 "amzn scrpr"] h]]
    (load-js)))
+
+(defn input-field [n]
+  [:input {:type "text" :name n}])
+
+(defn input-field-with-label [n]
+  [:p [:label (str n \:)] (input-field n)])
+
+(defn password-field-with-label [n]
+  [:p [:label (str n \:)] (password-field n)])

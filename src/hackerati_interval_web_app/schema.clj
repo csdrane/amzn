@@ -132,7 +132,10 @@
        (add-price! @a)))
     (catch Exception e (str "Error refreshing prices: " e))))
 
+(defn exists? [k v]
+  "Takes a key and a value. Returns true if key value pair exists in users table."
+  (seq (select users (where {k v}))))
 
 (defn valid-user? [username password]
-  (if (user-exists? username)
+  (if (exists? :username username)
       (password/check password (get-user-pw username))))
