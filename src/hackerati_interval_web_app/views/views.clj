@@ -1,6 +1,6 @@
-(ns hackerati-interval-web-app.views
-  (:require [clojure.data.csv :as csv] 
-            [clojure.data.json :as json] 
+(ns hackerati-interval-web-app.views.views
+  (:require [clojure.data.json :as json] 
+            [hackerati-interval-web-app.views.template :as template]
             [hackerati-interval-web-app.schema :as db]
             [korma.core :as k]
             [hiccup.core :refer :all]
@@ -12,20 +12,10 @@
   (:use [ring.util.response :only [response]])
   (:import java.io.StringWriter))
 
-
-
 (def ^:dynamic *debug-mode* false)
 
 (defn debug [x]
   (if *debug-mode* (str x)))
-
-(defn- load-requirements []
-  (list
-   (include-css "/bootstrap/css/bootstrap.min.css")
-   (include-css "/bootstrap3-editable/css/bootstrap-editable.css")
-   (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
-   (include-js "/bootstrap/js/bootstrap.min.js")
-   (include-js "/bootstrap3-editable/js/bootstrap-editable.min.js")))
 
 (defn- get-username-from-request-map [request]
   {:pre [(or (contains? (request :session) :username)
@@ -35,22 +25,6 @@
     username
     (if-let [username (-> request :params :username)]
       username)))
-
-(defn chart-csv [productid]
-  "Serves CSV for use in chart."
-  (let [data (db/get-prices productid)
-        columns [:date :price]
-        headers (map name columns)
-        rows (mapv #(mapv % columns) data)]
-    (with-open [s (StringWriter.)]
-      (csv/write-csv s (cons headers rows))
-      (str s))))
-
-;; (defn chart-test [] 
-;;   (html5
-;;    [:div {:id "graphdiv"}]
-;;    (include-js "/dygraph-combined.js")
-;;    (include-js "/amzn-chart.js")))
 
 ;; TODO add message indicating successful operation; currently returns 404
 (defn delete-link! [request]
@@ -64,18 +38,6 @@
             (str "Delete link successful!"))
         (catch Exception e "Error: deletion failed!")))))
 
-(defhtml site-template
-  "Takes hiccup html and wraps it in site-global template" 
-  [h] 
-  (html5 
-   [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-   (load-requirements)
-   (include-js "/main.js")
-   (include-css "/main.css")
-   [:body
-    [:div {:class "container-fixed"} 
-     [:h1 "amzn scrpr"] h]]))
-
 (defn link-view 
   "Display prices after clicking on tracked link"
   [request]
@@ -83,9 +45,10 @@
         {username :username} session
         {params :params} request
         {productid :productid} params]
-    (site-template
+    (template/site-template
      (if (db/authorized-link? {:username username :productid productid}) 
-       (html
+       (html 
+        [:h3 "Replace with :description"]
         [:div {:id "graphdiv" :productid productid}]
         [:div
          [:table {:class "table table-striped table-condensed"}
@@ -126,7 +89,7 @@
         {session :session} request]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (site-template (html 
+     :body (template/site-template (html 
                            [:h3 "Links you're following, " (str username)] [:br] [:br]
                            (tracked-links-html username)
                            [:div {:class "small" :id "editing-fields"} 
@@ -158,54 +121,67 @@
         (catch Exception e (str "Add link failed! " e)))
       (str "Not a valid link!"))))
 
-(defn not-logged-in [request] 
-  (site-template
+(defn input-field [n]
+  [:input {:type "text" :name n}])
+
+(defn input-field-with-label [n]
+  [:p [:label (str n \:)] (input-field n)])
+
+(defn password-field-with-label [n]
+  [:p [:label (str n \:)] (password-field n)])
+
+(defn not-logged-in [& {:keys [message] :or {message ""}}] 
+  "View of site when not logged in. Accepts optional request parameter for use when debugging is enabled."
+  (template/site-template
    (html [:div {:class "logged-out-container"}
           (form-to [:post "/login"]
-                   [:p [:label "username:"] [:input {:type "text" :name "username"}]] [:br]
-                   [:p [:label "password:"] (password-field "password")] [:br]
+                   (input-field-with-label "username") 
+                   (password-field-with-label "password")
                    (submit-button "log in"))]
     [:br] [:br]
     [:div {:class "logged-out-container"} 
      (form-to [:post "/register"]
-              [:p [:label "username:"] [:input {:type "text" :name "username"}]] [:br]
-              [:p [:label "password:"] (password-field "password")] [:br]
-              [:p [:label "email:"] [:input {:type "text" :name "email"}]] [:br]
+              (input-field-with-label "username")
+              (password-field-with-label "password")
+              (input-field-with-label "email")
               (anti-forgery-field)
               (submit-button "submit"))]
-    (html [:br] [:br] (debug request)))))
+    [:br] [:br] 
+    (if (seq message) 
+      [:div {:class "alert alert-info"} message]))))
 
 (defn index [request]
   (let [{session :session} request] 
     (if (logged-in? session)
       (if (db/user-exists? (session :username))
         (logged-in request))
-      (not-logged-in request))))
+      (not-logged-in))))
 
 (defn login 
   [request]
   (let [{params :params} request
         {username :username} params  
         {password :password} params
-        {session :session} request]
+        {session :session} request
+        message "Error: username/password invalid!"]
     (if (db/valid-user? username password)
       (logged-in request)
-      (not-logged-in))))
+      (not-logged-in :message message))))
 
 (defn registration-failed []
   (->> [:h2 "Sorry, registration failed!"]
-       site-template))
+       template/site-template))
 
 (defn user-exists []
   (->> [:h2 "Sorry, user exists!"]
-       site-template))
+       template/site-template))
 
 (defn registration-successful []
   (->> [:h2 "Registration successful!"]
-       site-template))
+       template/site-template))
 
 (defn attempt-register [{params :params}]
- (let [username (:username params)
+  (let [username (:username params)
        pw (:password params)
        email (:email params)]
    (if (db/user-exists? username)
@@ -213,10 +189,3 @@
     (do
       (db/add-user! username pw email)
       (registration-successful)))))
-
-(defn session-test [request]
-  (let [{session :session} request] 
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :body (str request)
-     :session (assoc session :counter 1)}))

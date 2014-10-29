@@ -134,4 +134,5 @@
   (seq (select users (where {:username username}))))
 
 (defn valid-user? [username password]
-  (password/check password (get-user-pw username)))
+  (if (user-exists? username)
+      (password/check password (get-user-pw username))))

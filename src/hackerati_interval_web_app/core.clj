@@ -5,7 +5,8 @@
   (:require  [compojure.core :refer :all]
              [compojure.handler :as handler]
              [compojure.route :as route]
-             [hackerati-interval-web-app.views :as views]
+             [hackerati-interval-web-app.views.csv :as csv]
+             [hackerati-interval-web-app.views.views :as views]
              [hackerati-interval-web-app.schema :as db]
              [ring.adapter.jetty :as jetty]
              [ring.middleware.defaults :refer :all]
@@ -18,11 +19,11 @@
   (GET "/" request (views/index request))
   (POST "/delete-link" request (views/delete-link! request))
   (GET "/link/:productid" request (views/link-view request))
-  (GET "/login" {session :session}  (views/not-logged-in session))
+  (GET "/login" {session :session}  (views/not-logged-in))
   (POST "/login" request (views/login request))
   (POST "/newlink" request (views/new-link request))
   (POST "/register" request (views/attempt-register request))
-  (GET "/csv/:productid" [productid] (views/chart-csv productid))
+  (GET "/csv/:productid" [productid] (csv/chart-csv productid))
   (route/resources "/bootstrap")
   (route/not-found "<h1>Page not found</h1>"))
 
@@ -32,15 +33,15 @@
   (wrap-json-response
    (wrap-defaults
     (handler/site main-routes)
-     (-> (assoc-in site-defaults [:security :anti-forgery] false)  
-         (assoc-in [:store] (ring.middleware.session.cookie/cookie-store {:key "a 16-byte secret"}))))
+    (-> (assoc-in site-defaults [:security :anti-forgery] false)  
+        (assoc-in [:store] (ring.middleware.session.cookie/cookie-store {:key "a 16-byte secret"}))))
    :pretty))
 
 (defn- scheduled-task [f]
   (-> (ScheduledThreadPoolExecutor. 10)
       (.scheduleAtFixedRate f 0 24 TimeUnit/HOURS)))
 
-;; Scheduled task must go first, otherwise won't get executed.
+;; Scheduled task must go first, otherwise won't be executed.
 (defn -main [& [port]]
   (if-let [port (try 
                   (Integer/parseInt port) 

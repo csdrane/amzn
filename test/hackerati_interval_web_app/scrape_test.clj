@@ -3,6 +3,19 @@
             [clojure.java.io :as io] 
             [hackerati-interval-web-app.scrape :refer :all]))
 
+;; Evaluating floats is tricky
+;; http://gettingclojure.wikidot.com/cookbook:numbers
+
+(defn- scale [x y]
+  (if (or (zero? x) (zero? y))
+    1
+    (Math/abs x)))
+
+(defn float=
+  ([x y] (float= x y 0.00001))
+  ([x y epsilon] (<= (Math/abs (- x y))
+                     (* (scale x y) epsilon))))
+
 (deftest get-price-from-file-test
   (testing "Validating that function returns actual product price from local HTML."
     (is (= (get-price-from-file 
@@ -20,18 +33,18 @@
 
 (deftest get-price-from-url-test
   (testing "Validating that function returns actual product price from local HTML."
-    (is (= (get-price-from-url 
+    (is (float= (get-price-from-url 
             "http://www.amazon.com/gp/aw/d/0060512806/ref=mp_s_a_1_1?qid=1411578682&sr=8-1") 
-           "$5.44"))
-    (is (= (get-price-from-url 
+           5.44))
+    (is (float= (get-price-from-url 
             "http://www.amazon.com/gp/aw/d/0544272994/ref=mr_books_bs_p1_")
-           "$14.40"))
-    (is (= (get-price-from-url 
+           14.4)) ;
+    (is (float= (get-price-from-url 
              "http://www.amazon.com/gp/aw/d/B00IO9PBPS/ref=mp_s_a_1_1?qid=1411579413&sr=8-1")
-           "$671.89"))
-    (is (= (get-price-from-url 
+           699.99))
+    (is (float= (get-price-from-url 
             "http://www.amazon.com/gp/aw/d/B0059715SA/ref=aw_d_var_2nd_shoes_img?ca=B005970V3U&vs=1")
-           "$68.87"))))
+           68.87))))
 
 (deftest mobile-url?-test
   (testing "Testing function's ability to discern mobile Amazon URLs."

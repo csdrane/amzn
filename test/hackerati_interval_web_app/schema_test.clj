@@ -62,7 +62,9 @@
 ;;;; TODO add test case to return all links
 (deftest get-links-test
   (is (= (db/get-links "chris")
-         (list {:url "http://foo.com" :description "Description 1"}))))
+         (list {:actionid 1, :productid 1, 
+                :url "http://foo.com",
+                :description "Description 1"}))))
 
 (deftest user-exists?-test
   (is (some? (db/user-exists? "chris")))

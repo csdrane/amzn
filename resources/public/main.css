@@ -3,6 +3,8 @@
 .logged-out-container label { display: table-cell; }
 .logged-out-container input { display: table-cell; }
 
+div .alert { width: 300px; }
+
 .container-fixed {
   margin: 0 auto;
   max-width: 970px;
