@@ -9,6 +9,7 @@
                  [org.clojure/data.json "0.2.5"]
                  [compojure "1.1.9"]
                  [crypto-password "0.1.3"]
+                 [environ "1.0.0"]
                  [hiccup "1.0.5"]
                  [korma "0.4.0"] 
                  [mysql/mysql-connector-java "5.1.32"]
