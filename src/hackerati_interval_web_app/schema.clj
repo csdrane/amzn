@@ -1,15 +1,16 @@
 (ns hackerati-interval-web-app.schema
-  (:require [hackerati-interval-web-app.scrape :as scrape]
+  (:require [environ.core :refer [env]]
+            [hackerati-interval-web-app.scrape :as scrape]
             [korma.db :refer :all]
             [korma.core :refer :all]
             [crypto.password.bcrypt :as password]))
 
 ;;;;;;;;;;;;;;;;;;;; DEFINITIONS ;;;;;;;;;;;;;;;;;;;;
 
-(defdb db (mysql {:host "127.0.0.1"
-                  :db "hackerati"
-                  :user "project"
-                  :password "project"}))
+(defdb db (mysql {:host (env :db-host)
+                  :db (env :db-name)
+                  :user (env :db-user)
+                  :password (env :db-password)}))
 
 (declare user tracked-links products productid url prices dates)
 
