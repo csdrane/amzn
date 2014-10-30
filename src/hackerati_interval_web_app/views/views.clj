@@ -1,6 +1,7 @@
 (ns hackerati-interval-web-app.views.views
   (:require [clojure.data.json :as json] 
             [hackerati-interval-web-app.views.template :as template]
+            [hackerati-interval-web-app.views.util :as util]
             [hackerati-interval-web-app.schema :as db]
             [korma.core :as k]
             [hiccup.core :refer :all]
@@ -8,6 +9,7 @@
             [hiccup.element :refer :all]
             [hiccup.form :refer :all]
             [hiccup.page :refer :all]
+            [hiccup.util :refer :all]
             [ring.util.anti-forgery :refer :all])
   (:use [ring.util.response :only [response]])
   (:import java.io.StringWriter))
@@ -83,7 +85,6 @@
            [:button {:type "button" :class "close" 
                      :onclick "deleteRow(this)"} "&times;"]]])]]]))
 
-;; TODO add third column that uses bootstrap's Close icon
 (defn logged-in [request]
   (let [username (get-username-from-request-map request)
         {session :session} request]
@@ -116,7 +117,8 @@
         (assoc (response {:success true 
                           :actionid (:generated_key 
                                      (db/add-link! 
-                                      (db/get-user-id username) link description))})
+                                       (db/get-user-id username) 
+                                         link (escape-html description)))})
           :headers {"Content-Type" "text/javascript;charset=UTF-8"})
         (catch Exception e (str "Add link failed! " e)))
       (str "Not a valid link!"))))
@@ -161,6 +163,12 @@
 (defn email-exists []
   (logged-out :message "Sorry, email already exists!"))
 
+(defn invalid-email []
+  (logged-out :message "Invalid email address! Please try again."))
+
+(defn invalid-username []
+  (logged-out :message "Invalid username! Please try again."))
+
 (defn registration-failed []
   (logged-out :message "Sorry, registration failed!"))
 
@@ -172,9 +180,11 @@
 
 (defn attempt-register [{params :params}]
   (let [username (:username params)
-       pw (:password params)
-       email (:email params)]
+        pw (:password params)
+        email (:email params)]
     (cond 
+     ((comp not util/valid-username?) username) (invalid-username)
+     ((comp not util/valid-email?) email) (invalid-email)
      (db/exists? :username  username) (user-exists)
      (db/exists? :email email) (email-exists)
      :else (do
