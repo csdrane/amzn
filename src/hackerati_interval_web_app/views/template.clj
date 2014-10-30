@@ -11,7 +11,7 @@
 
 (defn- load-js []
   (list 
-   (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
+   (include-js "https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
    (include-js "/bootstrap/js/bootstrap.min.js")
    (include-js "/bootstrap3-editable/js/bootstrap-editable.min.js")
    (include-js "/main.js")))
