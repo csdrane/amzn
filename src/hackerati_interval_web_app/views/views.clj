@@ -94,9 +94,9 @@
                            [:h3 "Links you're following, " (str username)] [:br] [:br]
                            (tracked-links-html username)
                            [:div {:class "small" :id "editing-fields"} 
-                             [:a {:href "#" :class "add-links"} "add"] 
+                             [:a {:href "#" :id "add-links"} "add"] 
                              " " 
-                             [:a {:href "#" :class "edit-links"} "edit"]] 
+                             [:a {:href "#" :id "edit-links"} "edit"]] 
                            [:br]
                            [:div {:id "msg" :class "alert hide"}]
                            (debug request)))

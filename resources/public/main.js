@@ -1,20 +1,18 @@
 $(function(){
-    $.fn.editable.defaults.mode = 'inline';
-
-    $('.edit-links').on('click', function(e){
+    $('#edit-links').on('click', function(e){
 	e.preventDefault();
 	$('.delete-button').show();
 	});
 
-    $('.add-links').on('click', function(e){ addRow(); return false; });
-
-    $('.add-links').on('save', function(e, params) {
-	$().editable('destroy');
+    $('#add-links').on('click', function(e){ 
+	addRow(); 
+	return false; 
     });
 });
 
 function addRow()
 {
+    //generate html
     $("#links-table").find("tbody")
 	.append($("<tr>")
 		.append($("<td>")
@@ -23,7 +21,7 @@ function addRow()
 				.attr("data-type", "text")
 				.attr("data-name", "link")
 				.attr("data-original-title", "Enter Amazon URL")
-				.attr("class", "new-link-param")
+				.attr("class", "myeditable")
 				.attr("id", "link")))
 		.append($("<td>")
 			.append($("<a>")
@@ -31,7 +29,7 @@ function addRow()
 				.attr("data-type", "text")
 				.attr("data-name", "description")
 				.attr("data-title", "Enter Description")
-				.attr("class", "new-link-param")
+				.attr("class", "myeditable")
 				.attr("id", "description")))
 		.append($("<button>")
 			.text("Save!")
@@ -39,35 +37,40 @@ function addRow()
 			.attr("class", "btn btn-primary")
 			.attr("id", "save-btn")));
 
+    $.fn.editable.defaults.mode = 'inline';
+
    $('#link').editable('option', 'validate', function(v) {
-       if(!v) return 'Required field!';});
+       if(!v) return 'Required field!';
+   });
 
     $('#description').editable('option', 'validate', function(v) {
-       if(!v) return 'Required field!';});
-
-    $(document).ready(function() {
-	$('.new-link-param').editable();
+	if(!v) return 'Required field!';
     });
+
+//    $('.myeditable').editable();
     
+    $('.myeditable').on('save.newlink', function(){
+	var that = this;
+	setTimeout(function() {
+            $(that).closest('td').next().find('.myeditable').editable('show');
+	}, 200);
+    });
+
     $('#save-btn').click(function() {
-    	$('.new-link-param').editable('submit', {
+    	$('.myeditable').editable('submit', {
     	    url: '/newlink', 
     	    ajaxOptions: {
 		type: 'post',
 		dataType: 'json'
     	    },
-	    // .. not passing if stmt for some reason 
-	    // try using json lib
     	    success: function (data, config) {
 		console.log(JSON.stringify(data));
-		console.log(data.actionid);
-		console.log(typeof data);
-    		if(data && data.actionid){ // assumes response like {"actionid": 2}
+		if(data && data.actionid){ // assumes response like {"actionid": 2}
 		    $(this).editable('option', 'actionid', data.actionid);
 		    $(this).removeClass('editable-unsaved');
 		    var msg = "Link saved.";
 		    $('#msg').addClass('alert-success').removeClass('hide').removeClass('alert-error').html(msg).show();
-		    $(this).off('save.newuser');
+		    $(this).off('save.newlink');
 		}
 		else if(data && data.errors){
 		    config.error.call(this, data.errors); 
@@ -80,7 +83,10 @@ function addRow()
 		} else {
     		console.log("Error: " + errors.responseText);
     		}
-    	    }}).editable('destroy').removeClass().removeAttr('id').parent().parent().children("button").remove();
+    	    }}).removeClass().parent().parent().children("button").remove();
+	
+	$('#link').editable('option', 'disabled', true).removeAttr('id');
+	$('#description').editable('option', 'disabled', true).removeAttr('id');
     });
 }
 
@@ -103,3 +109,51 @@ function deleteRow(t)
     });
 }
 
+// via StackOverflow
+var functionLogger = {};
+
+functionLogger.log = true;//Set this to false to disable logging 
+
+/**
+ * Gets a function that when called will log information about itself if logging is turned on.
+ *
+ * @param func The function to add logging to.
+ * @param name The name of the function.
+ *
+ * @return A function that will perform logging and then call the function. 
+ */
+functionLogger.getLoggableFunction = function(func, name) {
+    return function() {
+        if (functionLogger.log) {
+            var logText = name + '(';
+
+            for (var i = 0; i < arguments.length; i++) {
+                if (i > 0) {
+                    logText += ', ';
+                }
+                logText += arguments[i];
+            }
+            logText += ');';
+
+            console.log(logText);
+        }
+
+        return func.apply(this, arguments);
+    }
+};
+
+/**
+ * After this is called, all direct children of the provided namespace object that are 
+ * functions will log their name as well as the values of the parameters passed in.
+ *
+ * @param namespaceObject The object whose child functions you'd like to add logging to.
+ */
+functionLogger.addLoggingToNamespace = function(namespaceObject){
+    for(var name in namespaceObject){
+        var potentialFunction = namespaceObject[name];
+
+        if(Object.prototype.toString.call(potentialFunction) === '[object Function]'){
+            namespaceObject[name] = functionLogger.getLoggableFunction(potentialFunction, name);
+        }
+    }
+};
