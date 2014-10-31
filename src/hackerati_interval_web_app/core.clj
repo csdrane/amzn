@@ -8,6 +8,7 @@
              [hackerati-interval-web-app.views.csv :as csv]
              [hackerati-interval-web-app.views.views :as views]
              [hackerati-interval-web-app.schema :as db]
+             [hackerati-interval-web-app.util :refer :all]
              [ring.adapter.jetty :as jetty]
              [ring.middleware.defaults :refer :all]
              [ring.middleware.session.cookie])
@@ -49,6 +50,7 @@
     (do
       (System/setProperty "java.awt.headless" "true")
       (scheduled-task db/refresh-prices)
+      (stay-alive 1)
       (jetty/run-jetty app 
                        {:port port :auto-reload? true}))
     (println "Useage: lein run port")))

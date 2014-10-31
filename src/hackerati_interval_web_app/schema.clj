@@ -119,6 +119,11 @@
        first
        :password))
 
+(defn ping-db []
+  "Ping the SQL server to keep connection alive."
+  (exec-raw ["SELECT 1"] :results)
+  (.println System/out "SQL Ping!"))
+
 (defn refresh-prices []
   (try 
     (let [products (select products)
