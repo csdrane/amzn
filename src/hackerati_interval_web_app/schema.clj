@@ -1,9 +1,5 @@
 (ns hackerati-interval-web-app.schema
-<<<<<<< HEAD
   (:require [environ.core :refer :all]
-=======
-  (:require [environ.core :refer [env]]
->>>>>>> Added environ to manage db config
             [hackerati-interval-web-app.scrape :as scrape]
             [korma.db :refer :all]
             [korma.core :refer :all]
