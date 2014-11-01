@@ -19,10 +19,11 @@
 (defroutes main-routes
   (GET "/" request (views/index request))
   (POST "/delete-link" request (views/delete-link! request))
+  (POST "/editlink" request (views/edit-link! request))
   (GET "/link/:productid" request (views/link-view request))
   (GET "/login" {session :session}  (views/logged-out))
   (POST "/login" request (views/login request))
-  (POST "/newlink" request (views/new-link request))
+  (POST "/newlink" request (views/add-link! request))
   (POST "/register" request (views/attempt-register request))
   (GET "/csv/:productid" [productid] (csv/chart-csv productid))
   (route/resources "/bootstrap")

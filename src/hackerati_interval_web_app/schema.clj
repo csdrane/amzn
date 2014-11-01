@@ -86,6 +86,12 @@
               (where {:actionid actionid}))
       (println "Deletion failed: not authorized! " link-map user-map))))
 
+
+(defn edit-link! [actionid value]
+  (update tracked-links
+          (set-fields {:description value})
+          (where {:actionid actionid})))
+
 (defn get-user-id [username]
   (->> (select users
                (where {:username username}))

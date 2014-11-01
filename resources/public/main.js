@@ -2,7 +2,8 @@ $(function(){
     $('#edit-links').on('click', function(e){
 	e.preventDefault();
 	$('.delete-button').show();
-	});
+	$('.description-editable').editable();
+    });
 
     $('#add-links').on('click', function(e){ 
 	addRow(); 

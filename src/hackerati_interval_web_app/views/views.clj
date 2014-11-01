@@ -28,6 +28,25 @@
     (if-let [username (-> request :params :username)]
       username)))
 
+(declare valid-link?)
+
+(defn add-link! [request] 
+  (let [{session :session} request
+        {params :params} request
+        {link :link} params
+        {description :description} params
+        {username :username} session]
+    (if (valid-link? link)
+      (try 
+        (assoc (response {:success true 
+                          :actionid (:generated_key 
+                                     (db/add-link! 
+                                       (db/get-user-id username) 
+                                         link (escape-html description)))})
+          :headers {"Content-Type" "text/javascript;charset=UTF-8"})
+        (catch Exception e (str "Add link failed! " e)))
+      (str "Not a valid link!"))))
+
 ;; TODO add message indicating successful operation; currently returns 404
 (defn delete-link! [request]
   (let [{session :session} request
@@ -39,6 +58,19 @@
         (do (db/delete-link! username actionid)
             (str "Delete link successful!"))
         (catch Exception e "Error: deletion failed!")))))
+
+(defn edit-link! [request]
+  (let [{session :session} request
+        {username :username} session
+        {params :params} request
+        {actionid :pk} params
+        {description :value} params]
+    (if (db/authorized-link? {:username username :actionid actionid})
+      (try
+        (do 
+          (db/edit-link! actionid (escape-html description))
+          (str "{success: true}"))
+        (catch Exception e "Error: deletion failed")))))
 
 (defn link-view 
   "Display prices after clicking on tracked link"
@@ -80,7 +112,8 @@
             (db/get-links username)]
         [:tr {:id actionid}
          [:td [:a {:href url} url]]
-         [:td [:a {:href (str "link/" productid)} description]]
+         [:td [:a {:href (str "link/" productid) :class "description-editable"
+                   :data-url "/editlink" :data-pk actionid} description]]
          [:td {:class "delete-button"} 
            [:button {:type "button" :class "close" 
                      :onclick "deleteRow(this)"} "&times;"]]])]]]))
@@ -105,23 +138,6 @@
 ;; TODO
 (defn valid-link? [link]
   true)
-
-(defn new-link [request] 
-  (let [{session :session} request
-        {params :params} request
-        {link :link} params
-        {description :description} params
-        {username :username} session]
-    (if (valid-link? link)
-      (try 
-        (assoc (response {:success true 
-                          :actionid (:generated_key 
-                                     (db/add-link! 
-                                       (db/get-user-id username) 
-                                         link (escape-html description)))})
-          :headers {"Content-Type" "text/javascript;charset=UTF-8"})
-        (catch Exception e (str "Add link failed! " e)))
-      (str "Not a valid link!"))))
 
 (defn logged-out [& {:keys [message] :or {message ""}}] 
   "View of site when not logged in. Accepts optional request parameter for use when debugging is enabled."
