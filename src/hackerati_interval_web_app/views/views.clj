@@ -28,15 +28,13 @@
     (if-let [username (-> request :params :username)]
       username)))
 
-(declare valid-link?)
-
 (defn add-link! [request] 
   (let [{session :session} request
         {params :params} request
         {link :link} params
         {description :description} params
         {username :username} session]
-    (if (valid-link? link)
+    (if (util/valid-link? link)
       (try 
         (assoc (response {:success true 
                           :actionid (:generated_key 
@@ -45,7 +43,8 @@
                                          link (escape-html description)))})
           :headers {"Content-Type" "text/javascript;charset=UTF-8"})
         (catch Exception e (str "Add link failed! " e)))
-      (str "Not a valid link!"))))
+      (assoc (response {:success false, :msg "<strong>Error: Not a valid link!</strong>"})
+        :status 500))))
 
 ;; TODO add message indicating successful operation; currently returns 404
 (defn delete-link! [request]
@@ -134,10 +133,6 @@
                            [:div {:id "msg" :class "alert hide"}]
                            (debug request)))
      :session (assoc session :username username)}))
-
-;; TODO
-(defn valid-link? [link]
-  true)
 
 (defn logged-out [& {:keys [message] :or {message ""}}] 
   "View of site when not logged in. Accepts optional request parameter for use when debugging is enabled."

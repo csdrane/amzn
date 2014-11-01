@@ -69,7 +69,7 @@ function addRow()
 		if(data && data.actionid){ // assumes response like {"actionid": 2}
 		    $(this).editable('option', 'actionid', data.actionid);
 		    $(this).removeClass('editable-unsaved');
-		    var msg = "Link saved.";
+		    var msg = "<strong>Link saved.</strong>";
 		    $('#msg').addClass('alert-success').removeClass('hide').removeClass('alert-error').html(msg).show();
 		    $(this).off('save.newlink');
 		}
@@ -80,10 +80,11 @@ function addRow()
     	    error: function(errors) {
 		var msg = "";
 		if(errors && errors.responseText){
-		    msg = errors.responseText;
+		    msg = JSON.parse(errors.responseText).msg;
 		} else {
-    		console.log("Error: " + errors.responseText);
+    		    $.each(errors, function(k, v) { msg += k+": "+v+"<br>"; });
     		}
+		$('#msg').removeClass('alert-success').removeClass('hide').addClass('alert-warning').html(msg).show();
     	    }}).removeClass().parent().parent().children("button").remove();
 	
 	$('#link').editable('option', 'disabled', true).removeAttr('id');
