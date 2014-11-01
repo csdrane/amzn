@@ -100,12 +100,15 @@ function deleteRow(t)
 	data: { actionid : actionid },
 	success: function()
 	{
+	    var msg = "<strong>Successfully deleted link.</strong>";
 	    var row = t.parentNode.parentNode;
 	    document.getElementById("links-table").deleteRow(row.rowIndex);
 	    console.log(row);
+	    $('#msg').addClass('alert-success').removeClass('hide').removeClass('alert-error').html(msg).show();
 	},
 	error: function(jq, status, message) {
-	    // show result of failed request
+	    var msg = "<strong>Error: Link deletion failed! If this message persists, please contact the administrator.</strong>";
+	    $('#msg').removeClass('alert-success').removeClass('hide').addClass('alert-warning').html(msg).show();    
 	}
     });
 }
