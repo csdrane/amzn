@@ -7,7 +7,7 @@
                  [org.clojure/java.jdbc "0.3.5"]
                  [org.clojure/data.csv "0.1.2"]
                  [org.clojure/data.json "0.2.5"]
-                 [compojure "1.1.9"]
+                 [compojure "1.2.1"]
                  [crypto-password "0.1.3"]
                  [environ "1.0.0"]
                  [hiccup "1.0.5"]
@@ -16,7 +16,7 @@
                  [ring "1.3.1"]
                  [ring/ring-defaults "0.1.1"]
                  [ring/ring-json "0.3.1"]]
-  :plugins [[lein-ring "0.8.12"]]
+  :plugins [[lein-ring "0.8.13"]]
   :ring {:handler hackerati-interval-web-app.core/app :port 3000 :main hackerati-interval-web-app.core}
   :uberjar-name "amzn.jar"
   :main ^:skip-aot hackerati-interval-web-app.core
