@@ -21,7 +21,6 @@
                                             [:userid :integer "references users (userid)"]
                                             [:actionid :integer "PRIMARY KEY" "AUTO_INCREMENT"]
                                             [:productid :integer "references products (productid)"]
-                                            ;; TODO add length validation/sanitization on input
                                             [:description "varchar(100)"]))) 
 
 ;; URL datatype based on http://stackoverflow.com/questions/219569/best-database-field-type-for-a-url
@@ -29,7 +28,7 @@
   (db-do-commands db (create-table-ddl :products
                                             [:productid :integer "PRIMARY KEY" "AUTO_INCREMENT"]
                                             [:url "varchar(2083)"])))
-;; TODO add unique (date, productid) constraint
+
 (defn create-prices-table [db]
   (db-do-commands db (create-table-ddl :prices
                                             [:priceid :integer "PRIMARY KEY" "AUTO_INCREMENT"]

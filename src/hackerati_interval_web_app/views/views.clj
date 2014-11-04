@@ -14,19 +14,7 @@
   (:use [ring.util.response :only [response]])
   (:import java.io.StringWriter))
 
-(def ^:dynamic *debug-mode* false)
-
-(defn debug [x]
-  (if *debug-mode* (str x)))
-
-(defn- get-username-from-request-map [request]
-  {:pre [(or (contains? (request :session) :username)
-             (contains? (request :params) :username))]
-   :post [((comp not empty?) %)]}
-  (if-let [username (-> request :session :username)]
-    username
-    (if-let [username (-> request :params :username)]
-      username)))
+(declare email-exists invalid-email invalid-username registration-successful user-exists)
 
 (defn add-link! [username link description]
   (if (util/valid-link? link)
@@ -41,13 +29,22 @@
     (assoc (response {:success false, :msg "<strong>Error: Not a valid link!</strong>"})
       :status 500)))
 
-;; TODO add message indicating successful operation; currently returns 404
+(defn attempt-register [username pw email]
+  (cond
+   ((comp not util/valid-username?) username) (invalid-username)
+   ((comp not util/valid-email?) email) (invalid-email)
+   (db/exists? :username username) (user-exists)
+   (db/exists? :email email) (email-exists)
+   :else (do
+           (db/add-user! username pw email)
+           (registration-successful))))
+
 (defn delete-link! [username actionid]
   (if (db/authorized-link? {:username username :actionid actionid})
     (try
       (do (db/delete-link! username actionid)
           (str "Delete link successful!"))
-      (catch Exception e "Error: deletion failed!"))))
+      (catch Exception e {:status 500 :msg "Error: deletion failed!"}))))
 
 (defn edit-link! [username actionid description]
   (if (db/authorized-link? {:username username :actionid actionid})
@@ -55,7 +52,7 @@
       (do
         (db/edit-link! actionid (escape-html description))
         (str "{success: true}"))
-      (catch Exception e "Error: deletion failed"))))
+      (catch Exception e {:status 500 :msg "Error: edit failed"}))))
 
 (defn link-view
   "Display prices after clicking on tracked link"
@@ -70,8 +67,10 @@
         [:thead
          [:tr [:th "Date"] [:th "Price"]]
          [:tbody
-          (for [{date :date price :price} (db/get-prices productid)]
-            [:tr [:td date] [:td price]])]]]]
+          (if-let [prices (seq (db/get-prices productid))]
+            (for [{date :date price :price} prices]
+              [:tr [:td date] [:td price]])
+            (html [:tr [:td [:strong "No price data yet. Check back tomorrow!"]]]))]]]]
       [:a {:href "/" :class "small"} "back"]
       (include-js "/dygraph-combined.js")
       (include-js "/amzn-chart.js"))
@@ -113,7 +112,7 @@
                                   [:div {:id "msg" :class "alert hide"}]))})
 
 (defn logged-out [message]
-  "View of site when not logged in. Accepts optional request parameter for use when debugging is enabled."
+  "View of site when not logged in. `message` will be displayed at bottom of page."
   (template/site-template
    (html [:div {:class "logged-out-container"}
           (form-to [:post "/login"]
@@ -145,29 +144,19 @@
       (logged-out (str message "username: " username "password: " password)))))
 
 (defn email-exists []
-  (logged-out :message "Sorry, email already exists!"))
+  (logged-out "Sorry, email already exists!"))
 
 (defn invalid-email []
-  (logged-out :message "Invalid email address! Please try again."))
+  (logged-out "Invalid email address! Please try again."))
 
 (defn invalid-username []
-  (logged-out :message "Invalid username! Please try again."))
+  (logged-out "Invalid username! Please try again."))
 
 (defn registration-failed []
-  (logged-out :message "Sorry, registration failed!"))
+  (logged-out "Sorry, registration failed!"))
 
 (defn registration-successful []
-  (logged-out :message "Registration successful!"))
+  (logged-out "Registration successful!"))
 
 (defn user-exists []
-  (logged-out :message "Sorry, user exists!"))
-
-(defn attempt-register [username pw email]
-  (cond
-   ((comp not util/valid-username?) username) (invalid-username)
-   ((comp not util/valid-email?) email) (invalid-email)
-   (db/exists? :username username) (user-exists)
-   (db/exists? :email email) (email-exists)
-   :else (do
-           (db/add-user! username pw email)
-           (registration-successful))))
+  (logged-out "Sorry, user exists!"))

@@ -15,6 +15,8 @@
   (:import (java.util.concurrent ScheduledThreadPoolExecutor TimeUnit))
   (:gen-class))
 
+; Would like to remove the redundancy here, but running into problems due I believe to Compojure's binding syntax.
+
 (defroutes POST-routes
   (POST "/login" {{username :username} :params
                   {password :password} :params}
