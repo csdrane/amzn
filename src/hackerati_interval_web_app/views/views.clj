@@ -17,7 +17,7 @@
 (declare email-exists invalid-email invalid-username registration-successful user-exists)
 
 (defn add-link! [username link description]
-  (if (util/valid-link? link)
+  (if-let [link (util/process-link link)]
     (try
       (assoc (response {:success true
                         :actionid (:generated_key
