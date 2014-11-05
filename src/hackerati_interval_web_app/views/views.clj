@@ -56,11 +56,11 @@
 
 (defn link-view
   "Display prices after clicking on tracked link"
-  [username productid]
+  [username productid actionid]
   (template/site-template
    (if (db/authorized-link? {:username username :productid productid})
      (html
-      [:h3 "Replace with :description"]
+      [:h3 (db/get-description actionid)]
       [:div {:id "graphdiv" :productid productid}]
       [:div
        [:table {:class "table table-striped table-condensed"}
@@ -92,7 +92,7 @@
             (db/get-links username)]
         [:tr {:id actionid}
          [:td [:a {:href url} url]]
-         [:td [:a {:href (str "link/" productid) :class "description-editable"
+         [:td [:a {:href (str "link/" productid "/" actionid) :class "description-editable"
                    :data-url "/editlink" :data-pk actionid} description]]
          [:td {:class "delete-button"}
            [:button {:type "button" :class "close"

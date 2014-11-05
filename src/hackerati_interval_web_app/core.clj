@@ -15,8 +15,7 @@
   (:import (java.util.concurrent ScheduledThreadPoolExecutor TimeUnit))
   (:gen-class))
 
-; Would like to remove the redundancy here, but running into problems due I believe to Compojure's binding syntax.
-
+; Would like to remove the redundancy here, but running into problems due I believe to Compojure's binding syntax and that the bindings are wrapped in (let), but (let) cannot use macros in its bindings.
 (defroutes POST-routes
   (POST "/login" {{username :username} :params
                   {password :password} :params}
@@ -40,9 +39,10 @@
     (views/edit-link! username actionid description)))
 
 (defroutes GET-routes
-  (GET "/link/:productid" {{username :username} :session
-                           {productid :productid} :params}
-    (views/link-view username productid))
+  (GET "/link/:productid/:actionid" {{username :username} :session
+                                    {productid :productid} :params
+                                    {actionid :actionid} :params}
+    (views/link-view username productid actionid))
   (GET "/csv/:productid" {{productid :productid} :params} (csv/chart-csv productid))
   (GET "/" {{:keys [username]} :session} (views/index username))
   (GET "/login" {{:keys [message]} :request} (views/logged-out message)))

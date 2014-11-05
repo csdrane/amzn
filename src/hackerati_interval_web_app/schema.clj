@@ -98,21 +98,27 @@
           (set-fields {:description value})
           (where {:actionid actionid})))
 
+(defn get-description [actionid]
+  (->> (select tracked-links
+               (where {:actionid actionid}))
+       first
+       :description)) 
+
 ;; Would like to refactor the redundancy but having trouble doing so.
 (defn get-links
-  ([]
-     (->> (select users
-                  (fields :products.url :products.productid :trackedlinks.description :trackedlinks.actionid)
-                  (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid})
-                  (join [products :products] {:products.productid :trackedlinks.productid}))
-          (map #(select-keys % [:url :description :productid :actionid]))))
-  ([username]
-     (->> (select users
-                  (fields :products.url :products.productid :trackedlinks.description :trackedlinks.actionid)
-                  (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid})
-                  (join [products :products] {:products.productid :trackedlinks.productid})
-                  (where {:username username}))
-          (map #(select-keys % [:url :description :productid :actionid])))))
+     ([]
+        (->> (select users
+                     (fields :products.url :products.productid :trackedlinks.description :trackedlinks.actionid)
+                     (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid})
+                     (join [products :products] {:products.productid :trackedlinks.productid}))
+             (map #(select-keys % [:url :description :productid :actionid]))))
+     ([username]
+        (->> (select users
+                     (fields :products.url :products.productid :trackedlinks.description :trackedlinks.actionid)
+                     (join [tracked-links :trackedlinks] {:users.userid :trackedlinks.userid})
+                     (join [products :products] {:products.productid :trackedlinks.productid})
+                     (where {:username username}))
+             (map #(select-keys % [:url :description :productid :actionid])))))
 
 (defn get-prices [productid]
   (->> (select prices
