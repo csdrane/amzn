@@ -19,8 +19,10 @@
 (defroutes POST-routes
   (POST "/login" {{username :username} :params
                   {password :password} :params}
-    ((fn [v] (assoc (:response-map v)
-               :session {:username (:username v)}))
+    ((fn [v] (if-let [response (:response-map v)] 
+               (assoc response
+                 :session {:username (:username v)})
+               v))
      (views/login username password)))
   (POST "/newlink" {{username :username} :session
                     {link :link} :params
