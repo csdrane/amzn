@@ -135,7 +135,7 @@
 (defn index [username]
   (if (and username (db/exists? :username username))
     (logged-in username)
-    (logged-out nil)))
+    (logged-out "Welcome! If this is your first time here, please try logging in with username \"guest\" and no password.")))
 
 (defn login [username password]
   (let [message "Error: username/password invalid!"]
