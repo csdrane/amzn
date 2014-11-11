@@ -138,7 +138,7 @@
     (logged-out "Welcome! If this is your first time here, please try logging in with username \"guest\" and no password.")))
 
 (defn login [username password]
-  (let [message "Error: username/password invalid!\n"]
+  (let [message "Error: username/password invalid! "]
     (if (db/valid-user? username password)
       {:response-map (logged-in username) :username username}
       (logged-out (str message "username: " username "password: " password)))))

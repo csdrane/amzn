@@ -13,7 +13,7 @@
     (let [mobile-stub "http://www.amazon.com/gp/aw/d/"
           productid (second valid-link)]
       (str mobile-stub productid))))
-(valid-link? "http://www.amazon.com/Let-Over-Lambda-Doug-Hoyte/dp/1435712757")
+
 (defn valid-username? [u]
   (re-find #"^\w{1,30}$" u))
 
