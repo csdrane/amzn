@@ -46,8 +46,10 @@
   ([userid url]
      (add-link! userid url "Description not provided."))
   ([userid url description]
-     (let [productid ((insert products (values {:url url})) :generated_key)]
-       (insert tracked-links (values {:userid userid :productid productid :description description})))))
+     (if-let [productid (-> products (select (where {:url url})) first :productid)]
+       (insert tracked-links (values {:userid userid :productid productid :description description}))
+       (let [productid ((insert products (values {:url url})) :generated_key)]
+        (insert tracked-links (values {:userid userid :productid productid :description description}))))))
 
 (defn add-price!
   ([{productid :productid price :price}]
