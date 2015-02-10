@@ -1,6 +1,6 @@
-(ns hackerati-interval-web-app.views.csv
+(ns amzn.views.csv
   (:require [clojure.data.csv :as csv] 
-            [hackerati-interval-web-app.schema :as db])
+            [amzn.schema :as db])
   (:import java.io.StringWriter))
 
 (defn chart-csv [productid]

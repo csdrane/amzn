@@ -1,4 +1,4 @@
-(ns hackerati-interval-web-app.views.template
+(ns amzn.views.template
   (:require [hiccup.def :refer :all]
             [hiccup.form :refer :all]
             [hiccup.page :refer :all]))

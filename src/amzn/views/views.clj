@@ -1,8 +1,8 @@
-(ns hackerati-interval-web-app.views.views
+(ns amzn.views.views
   (:require [clojure.data.json :as json]
-            [hackerati-interval-web-app.views.template :as template]
-            [hackerati-interval-web-app.views.util :as util]
-            [hackerati-interval-web-app.schema :as db]
+            [amzn.views.template :as template]
+            [amzn.views.util :as util]
+            [amzn.schema :as db]
             [korma.core :as k]
             [hiccup.core :refer :all]
             [hiccup.def :refer :all]

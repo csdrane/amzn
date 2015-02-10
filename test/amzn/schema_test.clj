@@ -1,8 +1,8 @@
-(ns hackerati-interval-web-app.schema-test
+(ns amzn.schema-test
   (:require [clojure.test :refer :all]
-            [hackerati-interval-web-app.schema :as db]
-            [hackerati-interval-web-app.jdbc :as jdbc]
-            [hackerati-interval-web-app.dbutility :as dbutil]
+            [amzn.schema :as db]
+            [amzn.jdbc :as jdbc]
+            [amzn.dbutility :as dbutil]
             [korma.db :as kdb]
             [korma.core :as kcore]))
 

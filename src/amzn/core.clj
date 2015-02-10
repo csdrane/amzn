@@ -1,13 +1,13 @@
 ; Run test server with `lein ring server-headless`
 ; Run -main with `lein run 3000`
 ; If lein run is crashing, you are probably forgetting the port number.
-(ns hackerati-interval-web-app.core
+(ns amzn.core
   (:require  [compojure.core :refer :all]
              [compojure.route :as route]
-             [hackerati-interval-web-app.views.csv :as csv]
-             [hackerati-interval-web-app.views.views :as views]
-             [hackerati-interval-web-app.schema :as db]
-             [hackerati-interval-web-app.util :refer :all]
+             [amzn.views.csv :as csv]
+             [amzn.views.views :as views]
+             [amzn.schema :as db]
+             [amzn.util :refer :all]
              [ring.adapter.jetty :as jetty]
              [ring.middleware.defaults :refer :all]
              [ring.middleware.session.cookie])

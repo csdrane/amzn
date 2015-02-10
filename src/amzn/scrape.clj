@@ -1,4 +1,4 @@
-(ns hackerati-interval-web-app.scrape
+(ns amzn.scrape
   (:require [clojure.string :as str])
   (:gen-class))
 

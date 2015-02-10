@@ -1,6 +1,6 @@
-(ns hackerati-interval-web-app.jdbc
+(ns amzn.jdbc
   (:require [clojure.java.jdbc :refer :all])
-  (:require [hackerati-interval-web-app.dbutility :as util]))
+  (:require [amzn.dbutility :as util]))
 
 (def db-spec {:classname "mysql-connector-java"
               :subprotocol "mysql"

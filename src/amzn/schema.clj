@@ -1,6 +1,6 @@
-(ns hackerati-interval-web-app.schema
+(ns amzn.schema
   (:require [environ.core :refer :all]
-            [hackerati-interval-web-app.scrape :as scrape]
+            [amzn.scrape :as scrape]
             [korma.db :refer :all]
             [korma.core :refer :all]
             [crypto.password.bcrypt :as password]))

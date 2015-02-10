@@ -1,4 +1,4 @@
-(ns hackerati-interval-web-app.views.util
+(ns amzn.views.util
   (:require [clojure.string :refer [lower-case]]))
 
 (defn valid-email? [e]

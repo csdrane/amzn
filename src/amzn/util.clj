@@ -1,5 +1,5 @@
-(ns hackerati-interval-web-app.util
-  (:require  [hackerati-interval-web-app.schema :as db])
+(ns amzn.util
+  (:require  [amzn.schema :as db])
   (:import (java.util.concurrent ScheduledThreadPoolExecutor TimeUnit)))
 
 (defn stay-alive [m]

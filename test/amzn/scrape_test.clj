@@ -1,7 +1,7 @@
-(ns hackerati-interval-web-app.scrape-test
+(ns amzn.scrape-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io] 
-            [hackerati-interval-web-app.scrape :refer :all]))
+            [amzn.scrape :refer :all]))
 
 ;; Evaluating floats is tricky
 ;; http://gettingclojure.wikidot.com/cookbook:numbers
