@@ -1,32 +1,6 @@
-# AMZN
+# AMZN Tracker
 
-FIXME: description
-
-## Installation
-
-Download from http://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar hackerati-interval-web-app-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+AMZN Tracker is a web app written in Clojure and built on top of the Ring/Compojure libraries. Users can submit Amazon product IDs. The app will scrape the price of these products daily. Users can then see how their products fluctuate in price over time.
 
 ## License
 
